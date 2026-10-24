@@ -437,6 +437,72 @@ VERIFIED_SCENES = [
         "translation": "Не стоит беспокоиться. Не стоит беспокоиться.",
         "hashtags": "#Not #to_worry. #Not #to_worry.",
         "word": "worry"
+    },
+    {
+        "id": 223726,
+        "cid": "72b6c397-1dbe-44d9-b09a-ad1f151bc955",
+        "quote": "Please, listen.",
+        "title": "Star Trek: The Next Generation - S01E17",
+        "translation": "Пожалуйста, послушай.",
+        "hashtags": "#Please, #listen.",
+        "word": "please",
+        "duration": 3.5,
+        "video_url": "https://y.getyarn.io/72b6c397-1dbe-44d9-b09a-ad1f151bc955.mp4"
+    },
+    {
+        "id": 223727,
+        "cid": "92cde2dc-5e34-449e-ada6-f8cdf3049825",
+        "quote": "Please help me.",
+        "title": "Succession (2018) - S01E01",
+        "translation": "Пожалуйста, помоги мне.",
+        "hashtags": "#Please #help #me.",
+        "word": "please",
+        "duration": 3.5,
+        "video_url": "https://y.getyarn.io/92cde2dc-5e34-449e-ada6-f8cdf3049825.mp4"
+    },
+    {
+        "id": 223728,
+        "cid": "2864c841-e420-4b95-9d8f-d579f1e888f9",
+        "quote": "Please, tell me!",
+        "title": "Scrooge: A Christmas Carol",
+        "translation": "Пожалуйста, скажи мне!",
+        "hashtags": "#Please, #tell #me!",
+        "word": "please",
+        "duration": 3.5,
+        "video_url": "https://y.getyarn.io/2864c841-e420-4b95-9d8f-d579f1e888f9.mp4"
+    },
+    {
+        "id": 223729,
+        "cid": "03f9236a-ae73-46bd-b178-0a4c122ec8ef",
+        "quote": "Please! Please don't!",
+        "title": "Hacksaw Ridge (2016)",
+        "translation": "Пожалуйста! Пожалуйста, не надо!",
+        "hashtags": "#Please! #Please #don_t!",
+        "word": "please",
+        "duration": 3.5,
+        "video_url": "https://y.getyarn.io/03f9236a-ae73-46bd-b178-0a4c122ec8ef.mp4"
+    },
+    {
+        "id": 223730,
+        "cid": "d2bd8e0a-6e61-4425-8470-0adc4a577f7e",
+        "quote": "Please forgive me.",
+        "title": "That '70s Show (1998) - S06E25",
+        "translation": "Пожалуйста, прости меня.",
+        "hashtags": "#Please #forgive #me.",
+        "word": "please",
+        "duration": 3.5,
+        "video_url": "https://y.getyarn.io/d2bd8e0a-6e61-4425-8470-0adc4a577f7e.mp4"
+    },
+    {
+        "id": 223731,
+        "cid": "1a87ab21-3391-41b2-af36-c473daf39d4a",
+        "quote": "Please let me go.",
+        "title": "The Love Boat (1977) - S01E12",
+        "translation": "Пожалуйста, отпусти меня.",
+        "hashtags": "#Please #let_me #go.",
+        "word": "please",
+        "duration": 3.5,
+        "video_url": "https://y.getyarn.io/1a87ab21-3391-41b2-af36-c473daf39d4a.mp4"
     }
 ]
 
@@ -878,7 +944,7 @@ def bot_polling_loop():
                             kb = {
                                 "keyboard": [
                                     [{"text": "🎬 Случайная карточка"}],
-                                    [{"text": "💡 Популярные темы"}],
+                                    [{"text": "💡 Популярные темы"}, {"text": "🍿 Фильмы и Аниме (English)"}],
                                     [{"text": "ℹ️ О тренажере"}]
                                 ],
                                 "resize_keyboard": True
@@ -922,6 +988,29 @@ def bot_polling_loop():
                                 send_cinema_card(chat_id, card_meta, clip_file)
                             else:
                                 api_call("sendMessage", {"chat_id": chat_id, "text": "❌ Не удалось вырезать фрагмент. Проверьте ссылку."})
+                            continue
+
+                        # Movies & Anime in English Guide
+                        if "Фильмы" in text or "Аниме" in text or "фильм" in text or "аниме" in text or text.startswith("/movies") or text.startswith("/anime"):
+                            movies_guide_text = (
+                                "🍿 <b>Где смотреть фильмы и аниме в оригинале (English Audio):</b>\n\n"
+                                "🎌 <b>Аниме в английском дубляже (English Dub):</b>\n"
+                                "• <a href=\"https://tubitv.com/category/anime\">Tubi TV Anime (English Dub)</a> — легальный бесплатный кинотеатр с коллекцией аниме в английской озвучке.\n"
+                                "• <a href=\"https://www.youtube.com/@CrunchyrollCollection\">Crunchyroll Collection (YouTube)</a> — официальные сцены и эпизоды аниме на английском.\n\n"
+                                "🎬 <b>Фильмы и сериалы в оригинале:</b>\n"
+                                "• <a href=\"https://www.bbc.co.uk/learningenglish/english/features/drama\">BBC Learning English Drama</a> — британские сериалы и драмы с разбором лексики и интерактивными субтитрами.\n"
+                                "• <a href=\"https://archive.org/details/feature_films\">Internet Archive Movies</a> — открытый каталог фильмов Голливуда в оригинальной озвучке без рекламы.\n"
+                                "• <a href=\"https://tubitv.com\">Tubi TV Movies</a> — бесплатные фильмы и сериалы на английском.\n"
+                                "• <a href=\"https://www.ted.com/talks\">TED Talks</a> — тысячи выступлений с интерактивным английским транскриптом.\n\n"
+                                "💡 <i>А для тренировки слуха прямо сейчас — отправьте любое английское слово в чат или нажмите кнопку ниже:</i>"
+                            )
+                            kb_m = {
+                                "inline_keyboard": [
+                                    [{"text": "🎬 Случайная сцена", "callback_data": "random"}],
+                                    [{"text": "💡 Популярные темы", "callback_data": "topics"}]
+                                ]
+                            }
+                            api_call("sendMessage", {"chat_id": chat_id, "text": movies_guide_text, "parse_mode": "HTML", "reply_markup": json.dumps(kb_m)})
                             continue
 
                         # Random scene button
@@ -999,7 +1088,7 @@ def read_root():
     return {
         "status": "online",
         "service": "Lingua Magic Cinema Bot 24/7 (Live Dynamic Database)",
-        "version": "2.9.0 (Interactive Transition Graph & Dynamic Yarn Diagnostic)",
+        "version": "2.10.0 (31 Verified Scenes, 7x Please Pool, Movies & Anime Guide)",
         "verified_scenes": len(VERIFIED_SCENES),
         "uptime": "24/7 online"
     }

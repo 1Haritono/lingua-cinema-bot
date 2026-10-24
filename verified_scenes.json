@@ -273,5 +273,71 @@
         "translation": "Не стоит беспокоиться. Не стоит беспокоиться.",
         "hashtags": "#Not #to_worry. #Not #to_worry.",
         "word": "worry"
+    },
+    {
+        "id": 223726,
+        "cid": "72b6c397-1dbe-44d9-b09a-ad1f151bc955",
+        "quote": "Please, listen.",
+        "title": "Star Trek: The Next Generation - S01E17",
+        "translation": "Пожалуйста, послушай.",
+        "hashtags": "#Please, #listen.",
+        "word": "please",
+        "duration": 3.5,
+        "video_url": "https://y.getyarn.io/72b6c397-1dbe-44d9-b09a-ad1f151bc955.mp4"
+    },
+    {
+        "id": 223727,
+        "cid": "92cde2dc-5e34-449e-ada6-f8cdf3049825",
+        "quote": "Please help me.",
+        "title": "Succession (2018) - S01E01",
+        "translation": "Пожалуйста, помоги мне.",
+        "hashtags": "#Please #help #me.",
+        "word": "please",
+        "duration": 3.5,
+        "video_url": "https://y.getyarn.io/92cde2dc-5e34-449e-ada6-f8cdf3049825.mp4"
+    },
+    {
+        "id": 223728,
+        "cid": "2864c841-e420-4b95-9d8f-d579f1e888f9",
+        "quote": "Please, tell me!",
+        "title": "Scrooge: A Christmas Carol",
+        "translation": "Пожалуйста, скажи мне!",
+        "hashtags": "#Please, #tell #me!",
+        "word": "please",
+        "duration": 3.5,
+        "video_url": "https://y.getyarn.io/2864c841-e420-4b95-9d8f-d579f1e888f9.mp4"
+    },
+    {
+        "id": 223729,
+        "cid": "03f9236a-ae73-46bd-b178-0a4c122ec8ef",
+        "quote": "Please! Please don't!",
+        "title": "Hacksaw Ridge (2016)",
+        "translation": "Пожалуйста! Пожалуйста, не надо!",
+        "hashtags": "#Please! #Please #don_t!",
+        "word": "please",
+        "duration": 3.5,
+        "video_url": "https://y.getyarn.io/03f9236a-ae73-46bd-b178-0a4c122ec8ef.mp4"
+    },
+    {
+        "id": 223730,
+        "cid": "d2bd8e0a-6e61-4425-8470-0adc4a577f7e",
+        "quote": "Please forgive me.",
+        "title": "That '70s Show (1998) - S06E25",
+        "translation": "Пожалуйста, прости меня.",
+        "hashtags": "#Please #forgive #me.",
+        "word": "please",
+        "duration": 3.5,
+        "video_url": "https://y.getyarn.io/d2bd8e0a-6e61-4425-8470-0adc4a577f7e.mp4"
+    },
+    {
+        "id": 223731,
+        "cid": "1a87ab21-3391-41b2-af36-c473daf39d4a",
+        "quote": "Please let me go.",
+        "title": "The Love Boat (1977) - S01E12",
+        "translation": "Пожалуйста, отпусти меня.",
+        "hashtags": "#Please #let_me #go.",
+        "word": "please",
+        "duration": 3.5,
+        "video_url": "https://y.getyarn.io/1a87ab21-3391-41b2-af36-c473daf39d4a.mp4"
     }
 ]
