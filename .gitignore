@@ -1,0 +1,5 @@
+tmp_clips/
+__pycache__/
+*.pyc
+.env
+hf_token.txt
