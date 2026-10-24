@@ -415,12 +415,11 @@ def format_cinema_post(cid, quote, translation, hashtags, show=None):
 
     title_part = f"<b>{cid} • 🎬 {show_esc}</b>" if show_esc else f"<b>{cid}</b>"
 
-    # In Telegram HTML, <tg-spoiler> CANNOT enclose blockquote!
-    # Instead, we spoiler hashtags, blockquote the quote, and spoiler the translation:
+    # In Telegram HTML, <tg-spoiler> CANNOT enclose blockquote, but blockquote CAN enclose <tg-spoiler>!
     return (
         f"{title_part}\n\n"
         f"<tg-spoiler>{tags_esc}</tg-spoiler>\n\n"
-        f"<blockquote>\"{q_esc}\"</blockquote>\n\n"
+        f"<blockquote><tg-spoiler>\"{q_esc}\"</tg-spoiler></blockquote>\n\n"
         f"<tg-spoiler>{tr_esc}</tg-spoiler>"
     )
 
