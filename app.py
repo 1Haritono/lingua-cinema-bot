@@ -343,74 +343,109 @@ def record_seen_card(chat_id, card_id):
     if len(hist) >= len(VERIFIED_SCENES) - 1:
         USER_SEEN_HISTORY[str(chat_id)] = hist[-3:]
 
+# Find matching scenes by word, phrase, or hashtag with relevance scoring
+def find_matching_scenes(query):
+    if not query:
+        return [], ""
+    raw = query.strip()
+    raw_lower = raw.lower()
+    clean_tag = raw_lower.lstrip("#").strip()
+    phrase = clean_tag.replace("_", " ")
+
+    words = [w for w in re.findall(r"[a-zA-Z']+", phrase) if len(w) >= 2]
+    stopwords = {"a", "an", "the", "to", "of", "in", "on", "at", "for", "and", "or", "so", "it", "is", "am", "are", "was", "were", "my", "your", "his", "her", "we", "he", "she", "they"}
+    significant_words = [w for w in words if w not in stopwords] or words
+
+    matches_with_score = []
+
+    for s in VERIFIED_SCENES:
+        score = 0
+        s_word = (s.get("word") or "").lower()
+        s_quote = (s.get("quote") or "").lower()
+        s_tags = (s.get("hashtags") or "").lower()
+
+        # 1. Exact match on card target word
+        for sw in significant_words:
+            if sw == s_word or sw.replace("'", "") == s_word.replace("'", ""):
+                score += 100
+
+        # 2. Hashtag exact match (e.g. #the_truth, #I_need)
+        if f"#{clean_tag}" in s_tags or f"#{clean_tag.replace(' ', '_')}" in s_tags:
+            score += 90
+
+        # 3. Whole phrase in quote
+        if phrase in s_quote:
+            score += 80
+
+        # 4. Words match in quote
+        s_quote_words = [w.strip(".,!?:;\"'") for w in s_quote.split()]
+        s_quote_words_clean = [re.sub(r"[^a-zA-Z']", "", w) for w in s_quote_words]
+
+        for sw in significant_words:
+            sw_no_apos = sw.replace("'", "")
+            for qw in s_quote_words_clean:
+                if sw == qw or sw_no_apos == qw.replace("'", ""):
+                    score += 50
+                    break
+
+        # 5. Partial hashtag match
+        for sw in significant_words:
+            if f"#{sw}" in s_tags or f"_{sw}" in s_tags:
+                score += 40
+
+        if score > 0:
+            matches_with_score.append((score, s))
+
+    matches_with_score.sort(key=lambda x: x[0], reverse=True)
+    target_word = significant_words[0] if significant_words else phrase
+    return [m[1] for m in matches_with_score], target_word
+
 # Fetch a verified scene from local collection matching query word (fast, 100% reliable)
 def fetch_live_cinema_scene(query, exclude_id=None, chat_id=None):
     if not query:
         return None
-    raw_w = query.strip().lower()
-    w_with_apos = re.sub(r"[^a-zA-Z']", '', raw_w)
-    w_no_apos = w_with_apos.replace("'", "")
-    
-    if not w_no_apos:
+
+    matches, target_word = find_matching_scenes(query)
+    if not matches:
         return None
 
     seen_ids = set(get_seen_cards(chat_id)) if chat_id else set()
     if exclude_id:
         seen_ids.add(str(exclude_id))
 
-    # 1. Search in verified scenes pool (matches quote words, hashtags, or target word)
-    if VERIFIED_SCENES:
-        matches = []
-        for s in VERIFIED_SCENES:
-            s_word = s.get("word", "").lower()
-            s_quote = s.get("quote", "").lower()
-            s_quote_words = [re.sub(r"[^a-zA-Z']", '', w) for w in s_quote.split()]
-
-            # Check if matching word exists
-            if (w_with_apos == s_word or 
-                w_no_apos == s_word.replace("'", "") or 
-                w_with_apos in s_quote_words or 
-                w_no_apos in [w.replace("'", "") for w in s_quote_words]):
-                matches.append(s)
-
-        # 1a. Priority 1: Scene with this word that user has NOT seen yet!
-        fresh_matches = [m for m in matches if str(m.get("id")) not in seen_ids]
-        if fresh_matches:
-            card = random.choice(fresh_matches)
-            card_id = card.get("id")
-            local_clip = os.path.join(BASE_DIR, "clips", f"clip_{card_id}.mp4")
-            if os.path.exists(local_clip) and os.path.getsize(local_clip) > 10000:
-                card_copy = dict(card)
-                card_copy["file_path"] = local_clip
-                return card_copy
-
-        # 1b. Priority 2: Other scene with this word excluding only current
-        other_matches = [m for m in matches if str(m.get("id")) != str(exclude_id)]
-        if other_matches:
-            card = random.choice(other_matches)
-            card_id = card.get("id")
-            local_clip = os.path.join(BASE_DIR, "clips", f"clip_{card_id}.mp4")
-            if os.path.exists(local_clip) and os.path.getsize(local_clip) > 10000:
-                card_copy = dict(card)
-                card_copy["file_path"] = local_clip
-                return card_copy
-
-    # 2. If all scenes for this word were seen, pick a FRESH verified scene
-    # from collection that the user hasn't seen yet! Never repeat!
-    if VERIFIED_SCENES:
-        fresh_scenes = [s for s in VERIFIED_SCENES if str(s.get("id")) not in seen_ids]
-        if not fresh_scenes:
-            fresh_scenes = [s for s in VERIFIED_SCENES if str(s.get("id")) != str(exclude_id)]
-        if not fresh_scenes:
-            fresh_scenes = VERIFIED_SCENES
-
-        card = random.choice(fresh_scenes)
+    # Priority 1: Scene with this word that user has NOT seen yet
+    fresh_matches = [m for m in matches if str(m.get("id")) not in seen_ids]
+    if fresh_matches:
+        card = fresh_matches[0]
         card_id = card.get("id")
         local_clip = os.path.join(BASE_DIR, "clips", f"clip_{card_id}.mp4")
         if os.path.exists(local_clip) and os.path.getsize(local_clip) > 10000:
             card_copy = dict(card)
             card_copy["file_path"] = local_clip
+            card_copy["search_word"] = target_word
             return card_copy
+
+    # Priority 2: Other scene with this word excluding only current
+    other_matches = [m for m in matches if str(m.get("id")) != str(exclude_id)]
+    if other_matches:
+        card = other_matches[0]
+        card_id = card.get("id")
+        local_clip = os.path.join(BASE_DIR, "clips", f"clip_{card_id}.mp4")
+        if os.path.exists(local_clip) and os.path.getsize(local_clip) > 10000:
+            card_copy = dict(card)
+            card_copy["file_path"] = local_clip
+            card_copy["search_word"] = target_word
+            return card_copy
+
+    # If only 1 match exists and it's current, return it
+    card = matches[0]
+    card_id = card.get("id")
+    local_clip = os.path.join(BASE_DIR, "clips", f"clip_{card_id}.mp4")
+    if os.path.exists(local_clip) and os.path.getsize(local_clip) > 10000:
+        card_copy = dict(card)
+        card_copy["file_path"] = local_clip
+        card_copy["search_word"] = target_word
+        return card_copy
 
     return None
 
@@ -432,12 +467,12 @@ def format_cinema_post(cid, quote, translation, hashtags, show=None):
     )
 
 # Send video post with buttons (supports local file or direct URL)
-def send_cinema_card(chat_id, card_data, video_path_or_url):
+def send_cinema_card(chat_id, card_data, video_path_or_url, search_word=None):
     cid = card_data.get('id') or get_next_card_id()
     quote = card_data.get('quote', '')
     translation = card_data.get('translation', quote)
     hashtags = card_data.get('hashtags') or build_quote_hashtags(quote)
-    word = card_data.get('word') or 'scene'
+    word = search_word if search_word else (card_data.get('word') or 'scene')
     show = card_data.get('show') or card_data.get('title') or ''
 
     caption = format_cinema_post(cid, quote, translation, hashtags, show)
@@ -469,10 +504,6 @@ def send_cinema_card(chat_id, card_data, video_path_or_url):
                     "chat_id": chat_id,
                     "caption": caption,
                     "parse_mode": "HTML",
-                    "supports_streaming": "true",
-                    "duration": int(card_data.get("duration", 4)),
-                    "width": 854,
-                    "height": 480,
                     "reply_markup": json.dumps(keyboard)
                 }, files={"video": (os.path.basename(video_path_or_url), vf)})
 
@@ -490,10 +521,6 @@ def send_cinema_card(chat_id, card_data, video_path_or_url):
                         "chat_id": chat_id,
                         "caption": safe_caption,
                         "parse_mode": "HTML",
-                        "supports_streaming": "true",
-                        "duration": int(card_data.get("duration", 4)),
-                        "width": 854,
-                        "height": 480,
                         "reply_markup": json.dumps(keyboard)
                     }, files={"video": (os.path.basename(video_path_or_url), vf)})
 
@@ -647,9 +674,18 @@ def bot_polling_loop():
                             api_call("answerCallbackQuery", {"callback_query_id": cq["id"], "text": f"🎬 Сцена со словом '{w}'..."})
                             scene = fetch_live_cinema_scene(w, exclude_id=curr_cid, chat_id=chat_id)
                             if scene:
-                                send_cinema_card(chat_id, scene, scene["file_path"])
+                                send_cinema_card(chat_id, scene, scene["file_path"], search_word=scene.get("search_word", w))
                             else:
                                 send_random_cinema_card(chat_id)
+                        elif data == "topics":
+                            api_call("answerCallbackQuery", {"callback_query_id": cq["id"]})
+                            preview_tags = " ".join([f"#{w.capitalize()}" for w in CONVERSATION_WORDS[:30]])
+                            msg_text = (
+                                f"💡 <b>Популярные слова и темы:</b>\n\n"
+                                f"{preview_tags}\n\n"
+                                f"💬 <i>Нажмите на любой хэштег или отправьте любое английское слово в чат!</i>"
+                            )
+                            api_call("sendMessage", {"chat_id": chat_id, "text": msg_text, "parse_mode": "HTML"})
                         elif data.startswith("anki:"):
                             api_call("answerCallbackQuery", {"callback_query_id": cq["id"], "text": "✅ Сцена сохранена в Anki!"})
                         else:
@@ -749,14 +785,32 @@ def bot_polling_loop():
                             api_call("sendMessage", {"chat_id": chat_id, "text": help_text, "parse_mode": "HTML"})
                             continue
 
-                        # If user just sent a word (e.g. "approach", "anger", "safe")
-                        clean_word = re.sub(r'[^a-zA-Z]', '', text)
-                        if clean_word and len(clean_word) >= 3:
-                            scene = fetch_live_cinema_scene(clean_word, chat_id=chat_id)
-                            if scene:
-                                send_cinema_card(chat_id, scene, scene["file_path"])
-                            else:
-                                send_random_cinema_card(chat_id)
+                        # Search by word, phrase, or hashtag (e.g. "the_truth", "#the_truth", "I_need", "think", "don't")
+                        matches, target_word = find_matching_scenes(text)
+                        if matches:
+                            seen_ids = set(get_seen_cards(chat_id))
+                            unseen = [m for m in matches if str(m.get("id")) not in seen_ids]
+                            chosen = unseen[0] if unseen else matches[0]
+                            local_clip = os.path.join(BASE_DIR, "clips", f"clip_{chosen['id']}.mp4")
+                            send_cinema_card(chat_id, chosen, local_clip, search_word=target_word)
+                            continue
+                        else:
+                            clean_t = re.sub(r'[^a-zA-Z0-9_\' ]', '', text).strip()
+                            if clean_t:
+                                not_found_msg = (
+                                    f"🔍 Сцен со словом «<b>{clean_t}</b>» в текущей подборке пока нет.\n\n"
+                                    f"💡 <i>Попробуйте популярные слова и хэштеги:</i>\n"
+                                    f"#Truth #Need #Think #Don't #Honest #Never #Control #Baby #What #Going\n\n"
+                                    f"Или нажмите кнопку ниже:"
+                                )
+                                kb_nf = {
+                                    "inline_keyboard": [
+                                        [{"text": "🎲 Случайная сцена", "callback_data": "random"}],
+                                        [{"text": "📚 Популярные темы", "callback_data": "topics"}]
+                                    ]
+                                }
+                                api_call("sendMessage", {"chat_id": chat_id, "text": not_found_msg, "parse_mode": "HTML", "reply_markup": json.dumps(kb_nf)})
+                                continue
         except Exception as e:
             time.sleep(2)
         time.sleep(0.5)
@@ -780,7 +834,7 @@ def read_root():
     return {
         "status": "online",
         "service": "Lingua Magic Cinema Bot 24/7 (Live Dynamic Database)",
-        "version": "2.5.0 (FastStart Streaming & Anti-Repeat History)",
+        "version": "2.6.0 (Zero-Spin Desktop Video & Exact Word Search)",
         "verified_scenes": len(VERIFIED_SCENES),
         "uptime": "24/7 online"
     }
