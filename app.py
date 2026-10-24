@@ -22,12 +22,13 @@ DATA_FILE = os.path.join(BASE_DIR, "cards_data.json")
 TMP_DIR = os.path.join(BASE_DIR, "tmp_clips")
 os.makedirs(TMP_DIR, exist_ok=True)
 
-# Load existing cards database
+# Load existing cards database (100 cards)
 CARDS = []
 if os.path.exists(DATA_FILE):
     try:
         with open(DATA_FILE, "r", encoding="utf-8") as f:
             CARDS = json.load(f)
+        print(f"Loaded {len(CARDS)} cards from {DATA_FILE}")
     except Exception as e:
         print("Error loading cards:", e)
 
@@ -45,7 +46,6 @@ def api_call(method, params=None, files=None):
 
 # Measure exact video duration using pure Python MP4 box parser + ffprobe fallback
 def get_video_duration(file_path):
-    # Try pure Python MP4 parser first (0 external dependencies)
     try:
         import struct
         with open(file_path, 'rb') as f:
@@ -75,7 +75,6 @@ def get_video_duration(file_path):
     except Exception:
         pass
 
-    # Fallback to ffprobe if available
     try:
         cmd = [
             "ffprobe", "-v", "error", "-show_entries",
@@ -86,16 +85,17 @@ def get_video_duration(file_path):
     except Exception:
         return 0.0
 
-# Search GetYarn clips with strict duration filter (3.5s - 8.0s)
-def search_valid_clips(word, limit=5):
-    patterns = [f"I {word}", f"you {word}", f"{word} that", f"to {word}", f"so {word}", word]
+# Search GetYarn clips with strict duration filter (3.0s - 8.5s)
+def search_valid_clips(word, limit=3):
+    patterns = [f"that is {word}", f"it was {word}", f"so {word}", f"I {word}", f"{word} that", word]
     results = []
     seen = set()
 
     for p in patterns:
         url = f"https://getyarn.io/yarn-find?text={urllib.parse.quote(p)}"
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
         try:
-            r = requests.get(url, timeout=7)
+            r = requests.get(url, headers=headers, timeout=6)
             if r.status_code == 200:
                 pattern = r'<a href="/yarn-clip/([a-f0-9\-]+)".*?<div class="title[^>]*>([^<]+)</div>.*?<div class="transcript[^>]*>([^<]+)</div>'
                 matches = re.findall(pattern, r.text, re.DOTALL)
@@ -105,25 +105,25 @@ def search_valid_clips(word, limit=5):
                     q = html.unescape(quote).strip()
                     q_clean = re.sub(r'[\?♪♫]+', '', q).strip()
                     words = re.findall(r"[a-zA-Z']+", q_clean)
-                    if len(words) >= 4 and len(set(w.lower() for w in words)) >= 3:
-                        # Download and check duration
+                    if len(words) >= 3:
                         clip_url = f"https://y.getyarn.io/{cid}.mp4"
                         temp_dest = os.path.join(TMP_DIR, f"{cid}.mp4")
-                        c_resp = requests.get(clip_url, timeout=10)
+                        c_resp = requests.get(clip_url, headers=headers, timeout=10)
                         if c_resp.status_code == 200 and len(c_resp.content) > 10000:
                             with open(temp_dest, "wb") as f:
                                 f.write(c_resp.content)
                             dur = get_video_duration(temp_dest)
                             
-                            # STRICT FILTER: between 3.5 and 8.0 seconds
-                            if 3.2 <= dur <= 8.5:
+                            # Filter: preferably 3.0s - 8.5s
+                            if 2.8 <= dur <= 8.5:
                                 results.append({
                                     "id": cid[:8],
                                     "word": word,
                                     "quote": q_clean,
                                     "show": html.unescape(title).strip(),
                                     "duration": dur,
-                                    "file_path": temp_dest
+                                    "file_path": temp_dest,
+                                    "video_url": clip_url
                                 })
                                 if len(results) >= limit:
                                     return results
@@ -196,26 +196,30 @@ def cut_youtube_clip(url, start_sec, duration=5.5):
         print("yt-dlp error:", e)
     return None
 
-# Format telegram post caption
+# Format telegram post caption with safe HTML escaping
 def format_post_caption(cid, show, hashtags, quote, translation):
+    q_esc = html.escape(quote)
+    tr_esc = html.escape(translation)
+    sh_esc = html.escape(show)
     return (
-        f"<b>{cid}</b> • 🎬 {show}\n\n"
+        f"<b>{cid}</b> • 🎬 {sh_esc}\n\n"
         f"{hashtags}\n\n"
-        f"<blockquote>\"{quote}\" ”</blockquote>\n\n"
-        f"<tg-spoiler>{translation}</tg-spoiler>"
+        f"<blockquote>\"{q_esc}\"</blockquote>\n\n"
+        f"<tg-spoiler>{tr_esc}</tg-spoiler>"
     )
 
-# Send video post with buttons
-def send_cinema_card(chat_id, card_data, video_path):
+# Send video post with buttons (supports URL or local file)
+def send_cinema_card(chat_id, card_data, video_path_or_url):
     word = card_data.get('word', 'scene')
     cid = card_data.get('id', '10001')
     show = card_data.get('show', 'Movie Clip')
     quote = card_data.get('quote', '')
     translation = card_data.get('translation', quote)
     
-    # Generate hashtags
     words = quote.split()
-    tags = " ".join([f"#{w.capitalize().replace('.', '')}" for w in words[:6]]) + "."
+    tags = " ".join([f"#{w.capitalize().replace('.', '')}" for w in words[:6]])
+    if tags:
+        tags += "."
     
     caption = format_post_caption(cid, show, tags, quote, translation)
 
@@ -232,19 +236,46 @@ def send_cinema_card(chat_id, card_data, video_path):
     }
 
     try:
-        with open(video_path, "rb") as vf:
+        # Check if URL
+        if isinstance(video_path_or_url, str) and (video_path_or_url.startswith("http://") or video_path_or_url.startswith("https://")):
             api_call("sendVideo", params={
                 "chat_id": chat_id,
+                "video": video_path_or_url,
                 "caption": caption,
                 "parse_mode": "HTML",
                 "reply_markup": json.dumps(keyboard)
-            }, files={"video": (os.path.basename(video_path), vf)})
+            })
+        elif os.path.exists(video_path_or_url):
+            with open(video_path_or_url, "rb") as vf:
+                api_call("sendVideo", params={
+                    "chat_id": chat_id,
+                    "caption": caption,
+                    "parse_mode": "HTML",
+                    "reply_markup": json.dumps(keyboard)
+                }, files={"video": (os.path.basename(video_path_or_url), vf)})
+        else:
+            print("Video source not accessible:", video_path_or_url)
     except Exception as e:
         print("Error sending video post:", e)
 
+# Instant random card sender (uses pre-curated 100 cards first for 100% instant response)
+def send_random_cinema_card(chat_id):
+    import random
+    if CARDS:
+        c = random.choice(CARDS)
+        v = c.get("video_url")
+        if v:
+            send_cinema_card(chat_id, c, v)
+            return
+        clips = search_valid_clips(c["word"], limit=1)
+        if clips:
+            send_cinema_card(chat_id, clips[0], clips[0]["file_path"])
+            return
+    api_call("sendMessage", {"chat_id": chat_id, "text": "🎬 Загружаю новую сцену, нажмите еще раз!"})
+
 # Background Telegram Bot Polling
 def bot_polling_loop():
-    print("Telegram Bot Polling started on Hugging Face 24/7...")
+    print("Telegram Bot Polling started on Render 24/7...")
     offset = 0
     while True:
         try:
@@ -261,14 +292,7 @@ def bot_polling_loop():
                         api_call("answerCallbackQuery", {"callback_query_id": cq["id"]})
 
                         if data == "random":
-                            import random
-                            c = random.choice(CARDS) if CARDS else None
-                            if c:
-                                # Ensure valid duration clip
-                                clips = search_valid_clips(c["word"], limit=1)
-                                if clips:
-                                    send_cinema_card(chat_id, clips[0], clips[0]["file_path"])
-                                    continue
+                            send_random_cinema_card(chat_id)
                         elif data.startswith("word:"):
                             w = data.split(":", 1)[1]
                             api_call("sendMessage", {"chat_id": chat_id, "text": f"🔍 Ищу отрывки со словом '{w}' (хронометраж 3.5–8 сек)..."})
@@ -276,9 +300,9 @@ def bot_polling_loop():
                             if clips:
                                 send_cinema_card(chat_id, clips[0], clips[0]["file_path"])
                             else:
-                                api_call("sendMessage", {"chat_id": chat_id, "text": f"Для слова '{w}' готовятся новые сцены."})
+                                api_call("sendMessage", {"chat_id": chat_id, "text": f"🎬 Подбираем новые сцены для '{w}'..."})
                         elif data.startswith("anki:"):
-                            api_call("sendMessage", {"chat_id": chat_id, "text": "✅ Сцена добавлена в очередь колоды 🎬 Кино-Вырезки!"})
+                            api_call("sendMessage", {"chat_id": chat_id, "text": "✅ Сцена добавлена в колоду 🎬 Кино-Вырезки!"})
 
                     # Handle Text Messages & YouTube Links
                     if "message" in upd and "text" in upd["message"]:
@@ -299,8 +323,8 @@ def bot_polling_loop():
                             )
                             kb = {
                                 "keyboard": [
-                                    [{"text": "🎲 Случайная карточка"}],
-                                    [{"text": "🎬 Все слова базы"}]
+                                    [{"text": "🎬 Случайная карточка"}],
+                                    [{"text": "📚 Все слова колоды (100 сцен)"}]
                                 ],
                                 "resize_keyboard": True
                             }
@@ -330,7 +354,6 @@ def bot_polling_loop():
                                     if found_sec is not None:
                                         start_time = found_sec
                                         quote_text = found_quote
-                                        print(f"Found word '{clean_w}' in YT sub at {start_time}s: '{quote_text}'")
 
                             clip_file = cut_youtube_clip(yt_url, start_time, duration=5.5)
                             if clip_file:
@@ -348,29 +371,42 @@ def bot_polling_loop():
                             continue
 
                         # Random scene button
-                        if "Случайная" in text:
-                            import random
-                            c = random.choice(CARDS) if CARDS else None
-                            if c:
-                                clips = search_valid_clips(c["word"], limit=1)
-                                if clips:
-                                    send_cinema_card(chat_id, clips[0], clips[0]["file_path"])
+                        if "Случайная" in text or "карточка" in text:
+                            send_random_cinema_card(chat_id)
                             continue
 
                         # If user just sent a word (e.g. "anger", "terrible", "agree")
                         clean_word = re.sub(r'[^a-zA-Z]', '', text)
                         if clean_word and len(clean_word) >= 3:
+                            # Check if word is already in our curated cards
+                            found_curated = [c for c in CARDS if c.get("word", "").lower() == clean_word.lower()]
+                            if found_curated and found_curated[0].get("video_url"):
+                                send_cinema_card(chat_id, found_curated[0], found_curated[0]["video_url"])
+                                continue
+                            
                             api_call("sendMessage", {"chat_id": chat_id, "text": f"🎬 Подбираю отрывок со словом '{clean_word}' (хронометраж 3.5–8 сек)..."})
                             clips = search_valid_clips(clean_word, limit=1)
                             if clips:
                                 send_cinema_card(chat_id, clips[0], clips[0]["file_path"])
                             else:
-                                api_call("sendMessage", {"chat_id": chat_id, "text": f"Для слова '{clean_word}' сцена обрабатывается."})
+                                api_call("sendMessage", {"chat_id": chat_id, "text": f"Для слова '{clean_word}' сцена обрабатывается. Нажмите «🎬 Случайная карточка»!"})
         except Exception as e:
             time.sleep(2)
         time.sleep(0.5)
 
-# FastAPI Healthcheck Endpoint for Hugging Face (port 7860)
+# Self-pinger to prevent Render Free tier from spinning down
+def keep_alive_loop():
+    time.sleep(30)
+    ping_url = os.environ.get("RENDER_EXTERNAL_URL", "https://lingua-cinema-bot.onrender.com")
+    while True:
+        try:
+            requests.get(ping_url, timeout=10)
+            print("Keep-alive ping sent successfully.")
+        except Exception as e:
+            print("Keep-alive error:", e)
+        time.sleep(600) # Ping every 10 minutes
+
+# FastAPI Healthcheck Endpoint
 app = FastAPI()
 
 @app.get("/")
@@ -378,16 +414,20 @@ def read_root():
     return {
         "status": "online",
         "service": "Lingua Magic Cinema Bot 24/7",
-        "version": "1.0.0",
-        "huggingface": "Spaces Community 16GB RAM"
+        "version": "1.0.1",
+        "uptime": "24/7 online"
     }
 
 if __name__ == "__main__":
-    # Start bot in a background daemon thread
+    # Start bot polling in background thread
     bot_thread = threading.Thread(target=bot_polling_loop, daemon=True)
     bot_thread.start()
 
-    # Run FastAPI server (reads PORT dynamically from environment for Render/Cloud)
+    # Start keep-alive pinger in background thread
+    ping_thread = threading.Thread(target=keep_alive_loop, daemon=True)
+    ping_thread.start()
+
+    # Run FastAPI server on dynamically assigned PORT
     port = int(os.environ.get("PORT", 8080))
     print(f"Starting server on port {port}...")
     uvicorn.run(app, host="0.0.0.0", port=port)
