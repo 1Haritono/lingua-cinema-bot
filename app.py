@@ -751,6 +751,29 @@ def read_root():
         "uptime": "24/7 online"
     }
 
+@app.get("/trigger_send")
+def trigger_send(chat_id: str = "8937275197"):
+    import traceback
+    card = VERIFIED_SCENES[0]
+    clip_url = card["video_url"]
+    temp_dest = os.path.join(TMP_DIR, f"diag_{card['cid']}.mp4")
+    logs = [f"Card: {card['id']}, URL: {clip_url}"]
+    try:
+        r = requests.get(clip_url, headers=BROWSER_HEADERS, timeout=10)
+        logs.append(f"Yarn status: {r.status_code}, bytes: {len(r.content)}")
+        if r.status_code == 200 and len(r.content) > 10000:
+            with open(temp_dest, "wb") as f:
+                f.write(r.content)
+            logs.append(f"File saved, size: {os.path.getsize(temp_dest)}")
+            res = send_cinema_card(chat_id, card, temp_dest)
+            logs.append(f"send_cinema_card result: {res}")
+            return {"ok": True, "logs": logs}
+        else:
+            logs.append("Yarn clip download failed")
+            return {"ok": False, "logs": logs}
+    except Exception as e:
+        return {"ok": False, "error": str(e), "trace": traceback.format_exc(), "logs": logs}
+
 if __name__ == "__main__":
     bot_thread = threading.Thread(target=bot_polling_loop, daemon=True)
     bot_thread.start()
