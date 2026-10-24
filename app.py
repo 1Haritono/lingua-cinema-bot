@@ -482,8 +482,9 @@ def send_cinema_card(chat_id, card_data, video_path_or_url):
                         "reply_markup": json.dumps(keyboard)
                     }, files={"video": (os.path.basename(video_path_or_url), vf)})
 
-            try: os.remove(video_path_or_url)
-            except Exception: pass
+            if video_path_or_url and "tmp" in video_path_or_url.lower():
+                try: os.remove(video_path_or_url)
+                except Exception: pass
             return resp
         else:
             print("Video source not accessible:", video_path_or_url)
@@ -496,12 +497,22 @@ def send_cinema_card(chat_id, card_data, video_path_or_url):
 def send_random_cinema_card(chat_id):
     import random
     
-    # 1. First priority: instant verified cinema scene from pool
+    # 1. First priority: instant verified cinema scene from local clips pool!
     if VERIFIED_SCENES:
         for attempt in range(len(VERIFIED_SCENES)):
             card = random.choice(VERIFIED_SCENES)
-            clip_url = card["video_url"]
-            temp_dest = os.path.join(TMP_DIR, f"{card.get('cid', card.get('id'))}.mp4")
+            card_id = card.get("id")
+
+            # Check local packaged clip first (100% immune to Cloudflare 403 blocks)
+            local_clip = os.path.join(BASE_DIR, "clips", f"clip_{card_id}.mp4")
+            if os.path.exists(local_clip) and os.path.getsize(local_clip) > 10000:
+                res = send_cinema_card(chat_id, card, local_clip)
+                if res and res.get("ok"):
+                    return
+
+            # Fallback to downloading if local clip is not available
+            clip_url = card.get("video_url")
+            temp_dest = os.path.join(TMP_DIR, f"{card.get('cid', card_id)}.mp4")
             try:
                 r = requests.get(clip_url, headers=BROWSER_HEADERS, timeout=8)
                 if r.status_code == 200 and len(r.content) > 10000:
@@ -755,21 +766,17 @@ def read_root():
 def trigger_send(chat_id: str = "8937275197"):
     import traceback
     card = VERIFIED_SCENES[0]
-    clip_url = card["video_url"]
-    temp_dest = os.path.join(TMP_DIR, f"diag_{card['cid']}.mp4")
-    logs = [f"Card: {card['id']}, URL: {clip_url}"]
+    card_id = card["id"]
+    local_clip = os.path.join(BASE_DIR, "clips", f"clip_{card_id}.mp4")
+    logs = [f"Card: {card_id}"]
     try:
-        r = requests.get(clip_url, headers=BROWSER_HEADERS, timeout=10)
-        logs.append(f"Yarn status: {r.status_code}, bytes: {len(r.content)}")
-        if r.status_code == 200 and len(r.content) > 10000:
-            with open(temp_dest, "wb") as f:
-                f.write(r.content)
-            logs.append(f"File saved, size: {os.path.getsize(temp_dest)}")
-            res = send_cinema_card(chat_id, card, temp_dest)
+        if os.path.exists(local_clip):
+            logs.append(f"Local clip found: {local_clip}, size: {os.path.getsize(local_clip)}")
+            res = send_cinema_card(chat_id, card, local_clip)
             logs.append(f"send_cinema_card result: {res}")
             return {"ok": True, "logs": logs}
         else:
-            logs.append("Yarn clip download failed")
+            logs.append(f"Local clip NOT found: {local_clip}")
             return {"ok": False, "logs": logs}
     except Exception as e:
         return {"ok": False, "error": str(e), "trace": traceback.format_exc(), "logs": logs}
