@@ -326,8 +326,25 @@ VERIFIED_SCENES = [
     }
 ]
 
+# User seen history to guarantee no repetitive cards
+USER_SEEN_HISTORY = {} # {chat_id: [cid1, cid2, ...]}
+
+def get_seen_cards(chat_id):
+    return USER_SEEN_HISTORY.setdefault(str(chat_id), [])
+
+def record_seen_card(chat_id, card_id):
+    if not chat_id:
+        return
+    hist = get_seen_cards(chat_id)
+    cid_str = str(card_id)
+    if cid_str not in hist:
+        hist.append(cid_str)
+    # When user saw almost all verified scenes, keep only the last 3 so they cycle fresh
+    if len(hist) >= len(VERIFIED_SCENES) - 1:
+        USER_SEEN_HISTORY[str(chat_id)] = hist[-3:]
+
 # Fetch a verified scene from local collection matching query word (fast, 100% reliable)
-def fetch_live_cinema_scene(query, exclude_id=None):
+def fetch_live_cinema_scene(query, exclude_id=None, chat_id=None):
     if not query:
         return None
     raw_w = query.strip().lower()
@@ -336,6 +353,10 @@ def fetch_live_cinema_scene(query, exclude_id=None):
     
     if not w_no_apos:
         return None
+
+    seen_ids = set(get_seen_cards(chat_id)) if chat_id else set()
+    if exclude_id:
+        seen_ids.add(str(exclude_id))
 
     # 1. Search in verified scenes pool (matches quote words, hashtags, or target word)
     if VERIFIED_SCENES:
@@ -352,13 +373,10 @@ def fetch_live_cinema_scene(query, exclude_id=None):
                 w_no_apos in [w.replace("'", "") for w in s_quote_words]):
                 matches.append(s)
 
-        # Prefer other scenes if user asked for "more scenes" with this word
-        candidate_matches = [m for m in matches if str(m.get("id")) != str(exclude_id)] if exclude_id else matches
-        if not candidate_matches and matches:
-            candidate_matches = matches
-
-        if candidate_matches:
-            card = random.choice(candidate_matches)
+        # 1a. Priority 1: Scene with this word that user has NOT seen yet!
+        fresh_matches = [m for m in matches if str(m.get("id")) not in seen_ids]
+        if fresh_matches:
+            card = random.choice(fresh_matches)
             card_id = card.get("id")
             local_clip = os.path.join(BASE_DIR, "clips", f"clip_{card_id}.mp4")
             if os.path.exists(local_clip) and os.path.getsize(local_clip) > 10000:
@@ -366,13 +384,27 @@ def fetch_live_cinema_scene(query, exclude_id=None):
                 card_copy["file_path"] = local_clip
                 return card_copy
 
-    # 2. If no exact match for this word in verified scenes, pick another scene from collection
-    # so the user ALWAYS gets a video immediately without failing!
+        # 1b. Priority 2: Other scene with this word excluding only current
+        other_matches = [m for m in matches if str(m.get("id")) != str(exclude_id)]
+        if other_matches:
+            card = random.choice(other_matches)
+            card_id = card.get("id")
+            local_clip = os.path.join(BASE_DIR, "clips", f"clip_{card_id}.mp4")
+            if os.path.exists(local_clip) and os.path.getsize(local_clip) > 10000:
+                card_copy = dict(card)
+                card_copy["file_path"] = local_clip
+                return card_copy
+
+    # 2. If all scenes for this word were seen, pick a FRESH verified scene
+    # from collection that the user hasn't seen yet! Never repeat!
     if VERIFIED_SCENES:
-        other_scenes = [s for s in VERIFIED_SCENES if str(s.get("id")) != str(exclude_id)] if exclude_id else VERIFIED_SCENES
-        if not other_scenes:
-            other_scenes = VERIFIED_SCENES
-        card = random.choice(other_scenes)
+        fresh_scenes = [s for s in VERIFIED_SCENES if str(s.get("id")) not in seen_ids]
+        if not fresh_scenes:
+            fresh_scenes = [s for s in VERIFIED_SCENES if str(s.get("id")) != str(exclude_id)]
+        if not fresh_scenes:
+            fresh_scenes = VERIFIED_SCENES
+
+        card = random.choice(fresh_scenes)
         card_id = card.get("id")
         local_clip = os.path.join(BASE_DIR, "clips", f"clip_{card_id}.mp4")
         if os.path.exists(local_clip) and os.path.getsize(local_clip) > 10000:
@@ -437,6 +469,10 @@ def send_cinema_card(chat_id, card_data, video_path_or_url):
                     "chat_id": chat_id,
                     "caption": caption,
                     "parse_mode": "HTML",
+                    "supports_streaming": "true",
+                    "duration": int(card_data.get("duration", 4)),
+                    "width": 854,
+                    "height": 480,
                     "reply_markup": json.dumps(keyboard)
                 }, files={"video": (os.path.basename(video_path_or_url), vf)})
 
@@ -454,8 +490,15 @@ def send_cinema_card(chat_id, card_data, video_path_or_url):
                         "chat_id": chat_id,
                         "caption": safe_caption,
                         "parse_mode": "HTML",
+                        "supports_streaming": "true",
+                        "duration": int(card_data.get("duration", 4)),
+                        "width": 854,
+                        "height": 480,
                         "reply_markup": json.dumps(keyboard)
                     }, files={"video": (os.path.basename(video_path_or_url), vf)})
+
+            if resp and resp.get("ok"):
+                record_seen_card(chat_id, cid)
 
             if video_path_or_url and "tmp" in video_path_or_url.lower():
                 try: os.remove(video_path_or_url)
@@ -470,12 +513,14 @@ def send_cinema_card(chat_id, card_data, video_path_or_url):
 
 # Send random verified live scene - NEVER FAILS, delivers in < 1 second!
 def send_random_cinema_card(chat_id):
-    import random
-    
-    # 1. First priority: instant verified cinema scene from local clips pool!
     if VERIFIED_SCENES:
-        for attempt in range(len(VERIFIED_SCENES)):
-            card = random.choice(VERIFIED_SCENES)
+        seen_ids = set(get_seen_cards(chat_id))
+        fresh_scenes = [s for s in VERIFIED_SCENES if str(s.get("id")) not in seen_ids]
+        if not fresh_scenes:
+            fresh_scenes = VERIFIED_SCENES
+
+        for attempt in range(len(fresh_scenes)):
+            card = random.choice(fresh_scenes)
             card_id = card.get("id")
 
             # Check local packaged clip first (100% immune to Cloudflare 403 blocks)
@@ -600,7 +645,7 @@ def bot_polling_loop():
                             w = parts[1] if len(parts) > 1 else "scene"
                             curr_cid = parts[2] if len(parts) > 2 else None
                             api_call("answerCallbackQuery", {"callback_query_id": cq["id"], "text": f"🎬 Сцена со словом '{w}'..."})
-                            scene = fetch_live_cinema_scene(w, exclude_id=curr_cid)
+                            scene = fetch_live_cinema_scene(w, exclude_id=curr_cid, chat_id=chat_id)
                             if scene:
                                 send_cinema_card(chat_id, scene, scene["file_path"])
                             else:
@@ -707,7 +752,7 @@ def bot_polling_loop():
                         # If user just sent a word (e.g. "approach", "anger", "safe")
                         clean_word = re.sub(r'[^a-zA-Z]', '', text)
                         if clean_word and len(clean_word) >= 3:
-                            scene = fetch_live_cinema_scene(clean_word)
+                            scene = fetch_live_cinema_scene(clean_word, chat_id=chat_id)
                             if scene:
                                 send_cinema_card(chat_id, scene, scene["file_path"])
                             else:
@@ -735,7 +780,7 @@ def read_root():
     return {
         "status": "online",
         "service": "Lingua Magic Cinema Bot 24/7 (Live Dynamic Database)",
-        "version": "2.4.0 (Fixed Random & Word Cycler)",
+        "version": "2.5.0 (FastStart Streaming & Anti-Repeat History)",
         "verified_scenes": len(VERIFIED_SCENES),
         "uptime": "24/7 online"
     }
@@ -771,7 +816,27 @@ def trigger_send(chat_id: str = "8937275197"):
     except Exception as e:
         return {"ok": False, "error": str(e), "trace": traceback.format_exc(), "logs": logs}
 
+# Optimize clips with faststart so Telegram Desktop streams instantly with 0 buffering
+def ensure_faststart_clips():
+    clips_dir = os.path.join(BASE_DIR, "clips")
+    if not os.path.exists(clips_dir):
+        return
+    for fname in os.listdir(clips_dir):
+        if fname.endswith(".mp4"):
+            fpath = os.path.join(clips_dir, fname)
+            tmp_fast = os.path.join(TMP_DIR, f"fast_{fname}")
+            try:
+                cmd = ["ffmpeg", "-y", "-i", fpath, "-c", "copy", "-movflags", "+faststart", tmp_fast]
+                res = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=5)
+                if res.returncode == 0 and os.path.exists(tmp_fast) and os.path.getsize(tmp_fast) > 10000:
+                    import shutil
+                    shutil.move(tmp_fast, fpath)
+            except Exception as e:
+                pass
+
 if __name__ == "__main__":
+    ensure_faststart_clips()
+
     bot_thread = threading.Thread(target=bot_polling_loop, daemon=True)
     bot_thread.start()
 
