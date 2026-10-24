@@ -746,7 +746,8 @@ def read_root():
     return {
         "status": "online",
         "service": "Lingua Magic Cinema Bot 24/7 (Live Dynamic Database)",
-        "version": "2.0.0",
+        "version": "2.1.0",
+        "verified_scenes": len(VERIFIED_SCENES),
         "uptime": "24/7 online"
     }
 
