@@ -10,6 +10,7 @@ import urllib.request
 import threading
 import subprocess
 import requests
+import random
 from fastapi import FastAPI
 import uvicorn
 
@@ -327,17 +328,28 @@ VERIFIED_SCENES = [
 
 # Fetch a verified scene from local collection matching query word (fast, 100% reliable)
 def fetch_live_cinema_scene(query, exclude_id=None):
-    w_clean = re.sub(r'[^a-zA-Z]', '', query).strip().lower()
-    if not w_clean:
+    if not query:
+        return None
+    raw_w = query.strip().lower()
+    w_with_apos = re.sub(r"[^a-zA-Z']", '', raw_w)
+    w_no_apos = w_with_apos.replace("'", "")
+    
+    if not w_no_apos:
         return None
 
     # 1. Search in verified scenes pool (matches quote words, hashtags, or target word)
     if VERIFIED_SCENES:
         matches = []
         for s in VERIFIED_SCENES:
-            quote_words = re.sub(r'[^a-zA-Z ]', ' ', s.get("quote", "")).lower().split()
-            target_w = s.get("word", "").lower()
-            if w_clean in quote_words or w_clean == target_w or w_clean in s.get("quote", "").lower():
+            s_word = s.get("word", "").lower()
+            s_quote = s.get("quote", "").lower()
+            s_quote_words = [re.sub(r"[^a-zA-Z']", '', w) for w in s_quote.split()]
+
+            # Check if matching word exists
+            if (w_with_apos == s_word or 
+                w_no_apos == s_word.replace("'", "") or 
+                w_with_apos in s_quote_words or 
+                w_no_apos in [w.replace("'", "") for w in s_quote_words]):
                 matches.append(s)
 
         # Prefer other scenes if user asked for "more scenes" with this word
@@ -723,10 +735,22 @@ def read_root():
     return {
         "status": "online",
         "service": "Lingua Magic Cinema Bot 24/7 (Live Dynamic Database)",
-        "version": "2.3.0 (Smart Scene Cycler & Full Spoilers)",
+        "version": "2.4.0 (Fixed Random & Word Cycler)",
         "verified_scenes": len(VERIFIED_SCENES),
         "uptime": "24/7 online"
     }
+
+@app.get("/test_card/{card_id}")
+def test_card(card_id: int, chat_id: str = "8937275197"):
+    matches = [c for c in VERIFIED_SCENES if c["id"] == card_id]
+    if not matches:
+        return {"ok": False, "error": f"Card {card_id} not found in verified scenes"}
+    card = matches[0]
+    local_clip = os.path.join(BASE_DIR, "clips", f"clip_{card_id}.mp4")
+    if not os.path.exists(local_clip):
+        return {"ok": False, "error": f"Local clip {local_clip} not found"}
+    res = send_cinema_card(chat_id, card, local_clip)
+    return {"ok": True, "card_id": card_id, "res": res}
 
 @app.get("/trigger_send")
 def trigger_send(chat_id: str = "8937275197"):
