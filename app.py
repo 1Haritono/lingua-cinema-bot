@@ -85,15 +85,32 @@ def get_video_duration(file_path):
     except Exception:
         return 0.0
 
-# Search GetYarn clips with strict duration filter (3.0s - 8.5s)
-def search_valid_clips(word, limit=3):
-    patterns = [f"that is {word}", f"it was {word}", f"so {word}", f"I {word}", f"{word} that", word]
+# Search GetYarn clips with natural phrases, sentence boundary check and duration filter
+def search_valid_clips(word, limit=1):
+    w_clean = re.sub(r'[^a-zA-Z]', '', word).strip().lower()
+    if not w_clean:
+        return []
+
+    # Priority queries: natural word patterns instead of synthetic phrases
+    queries = [
+        w_clean,
+        f"a {w_clean}",
+        f"the {w_clean}",
+        f"to {w_clean}",
+        f"I {w_clean}",
+        f"{w_clean}ing"
+    ]
     results = []
     seen = set()
 
-    for p in patterns:
-        url = f"https://getyarn.io/yarn-find?text={urllib.parse.quote(p)}"
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Referer': 'https://getyarn.io/'
+    }
+
+    for q in queries:
+        url = f"https://getyarn.io/yarn-find?text={urllib.parse.quote(q)}"
         try:
             r = requests.get(url, headers=headers, timeout=6)
             if r.status_code == 200:
@@ -102,20 +119,23 @@ def search_valid_clips(word, limit=3):
                 for cid, title, quote in matches:
                     if cid in seen: continue
                     seen.add(cid)
-                    q = html.unescape(quote).strip()
-                    q_clean = re.sub(r'[\?♪♫]+', '', q).strip()
+                    q_raw = html.unescape(quote).strip()
+                    # Filter: reject quotes ending in comma, semicolon, dash, or colon (cut off mid-sentence)
+                    if q_raw and q_raw[-1] in [',', ';', '-', ':']:
+                        continue
+                    q_clean = re.sub(r'[\?♪♫]+', '', q_raw).strip()
                     words = re.findall(r"[a-zA-Z']+", q_clean)
-                    if len(words) >= 3:
+                    if len(words) >= 2:
                         clip_url = f"https://y.getyarn.io/{cid}.mp4"
                         temp_dest = os.path.join(TMP_DIR, f"{cid}.mp4")
-                        c_resp = requests.get(clip_url, headers=headers, timeout=10)
+                        c_resp = requests.get(clip_url, headers=headers, timeout=8)
                         if c_resp.status_code == 200 and len(c_resp.content) > 10000:
                             with open(temp_dest, "wb") as f:
                                 f.write(c_resp.content)
                             dur = get_video_duration(temp_dest)
                             
-                            # Filter: preferably 3.0s - 8.5s
-                            if 2.8 <= dur <= 8.5:
+                            # Filter: full phrase duration (2.2s - 8.5s)
+                            if 2.2 <= dur <= 8.5:
                                 results.append({
                                     "id": cid[:8],
                                     "word": word,
@@ -224,7 +244,7 @@ def highlight_target_word_in_quote(quote, word):
         
     return re.sub(pattern, repl, q_esc, flags=re.IGNORECASE)
 
-# Format telegram post caption with clear studied word & target hashtag
+# Format telegram post caption with full blur spoiler for pure listening practice
 def format_post_caption(cid, show, word, quote, translation):
     sh_esc = html.escape(show or "Movie Clip", quote=False)
     tr_esc = html.escape(translation or quote or "", quote=False)
@@ -235,12 +255,15 @@ def format_post_caption(cid, show, word, quote, translation):
     tag_word = f"#{w_clean.capitalize()}" if w_clean else "#CinemaEnglish"
     hashtags = f"{tag_word} #CinemaEnglish"
     
+    # Film info is visible; target word, quote and translation are completely hidden under spoiler
     return (
         f"<b>{cid}</b> • 🎬 {sh_esc}\n\n"
+        f"<tg-spoiler>"
         f"🎯 Изучаем: <code>{w_display}</code>\n"
         f"🏷 {hashtags}\n\n"
         f"<blockquote>\"{highlighted_quote}\"</blockquote>\n\n"
-        f"<tg-spoiler>{tr_esc}</tg-spoiler>"
+        f"{tr_esc}"
+        f"</tg-spoiler>"
     )
 
 # Send video post with buttons (supports URL or local file)
@@ -325,12 +348,18 @@ def bot_polling_loop():
                             send_random_cinema_card(chat_id)
                         elif data.startswith("word:"):
                             w = data.split(":", 1)[1]
-                            api_call("sendMessage", {"chat_id": chat_id, "text": f"🔍 Ищу отрывки со словом '{w}' (хронометраж 3.5–8 сек)..."})
+                            api_call("sendMessage", {"chat_id": chat_id, "text": f"🔍 Ищу отрывки со словом '{w}'..."})
                             clips = search_valid_clips(w, limit=1)
                             if clips:
                                 send_cinema_card(chat_id, clips[0], clips[0]["file_path"])
                             else:
-                                api_call("sendMessage", {"chat_id": chat_id, "text": f"🎬 Подбираем новые сцены для '{w}'..."})
+                                other_cards = [c for c in CARDS if c.get("word", "").lower() == w.lower()]
+                                if other_cards:
+                                    import random
+                                    c = random.choice(other_cards)
+                                    send_cinema_card(chat_id, c, c.get("video_url") or c.get("video_file"))
+                                else:
+                                    api_call("sendMessage", {"chat_id": chat_id, "text": f"🎬 Для слова '{w}' сцены еще формируются. Нажмите «🎲 Случайная сцена»!"})
                         elif data.startswith("anki:"):
                             api_call("sendMessage", {"chat_id": chat_id, "text": "✅ Сцена добавлена в колоду 🎬 Кино-Вырезки!"})
 
