@@ -196,15 +196,50 @@ def cut_youtube_clip(url, start_sec, duration=5.5):
         print("yt-dlp error:", e)
     return None
 
-# Format telegram post caption with safe HTML escaping
-def format_post_caption(cid, show, hashtags, quote, translation):
-    q_esc = html.escape(quote)
-    tr_esc = html.escape(translation)
-    sh_esc = html.escape(show)
+# Highlight target studied word in quote (bold + underline)
+def highlight_target_word_in_quote(quote, word):
+    if not quote:
+        return ""
+    if not word:
+        return html.escape(quote, quote=False)
+    
+    w_clean = re.sub(r'[^a-zA-Z]', '', word).strip()
+    if not w_clean:
+        return html.escape(quote, quote=False)
+    
+    stem = w_clean
+    if len(w_clean) > 4:
+        if w_clean.endswith(('ing', 'ies', 'ied')):
+            stem = w_clean[:-3]
+        elif w_clean.endswith(('ed', 'es', 'er', 'ly')):
+            stem = w_clean[:-2]
+        elif w_clean.endswith('e'):
+            stem = w_clean[:-1]
+            
+    pattern = rf'\b({re.escape(w_clean)}\w*|{re.escape(stem)}\w*)\b'
+    q_esc = html.escape(quote, quote=False)
+    
+    def repl(m):
+        return f"<b><u>{m.group(0)}</u></b>"
+        
+    return re.sub(pattern, repl, q_esc, flags=re.IGNORECASE)
+
+# Format telegram post caption with clear studied word & target hashtag
+def format_post_caption(cid, show, word, quote, translation):
+    sh_esc = html.escape(show or "Movie Clip", quote=False)
+    tr_esc = html.escape(translation or quote or "", quote=False)
+    w_clean = re.sub(r'[^a-zA-Z]', '', word).strip() if word else ""
+    w_display = w_clean.upper() if w_clean else html.escape(str(word))
+    
+    highlighted_quote = highlight_target_word_in_quote(quote, word)
+    tag_word = f"#{w_clean.capitalize()}" if w_clean else "#CinemaEnglish"
+    hashtags = f"{tag_word} #CinemaEnglish"
+    
     return (
         f"<b>{cid}</b> • 🎬 {sh_esc}\n\n"
-        f"{hashtags}\n\n"
-        f"<blockquote>\"{q_esc}\"</blockquote>\n\n"
+        f"🎯 Изучаем: <code>{w_display}</code>\n"
+        f"🏷 {hashtags}\n\n"
+        f"<blockquote>\"{highlighted_quote}\"</blockquote>\n\n"
         f"<tg-spoiler>{tr_esc}</tg-spoiler>"
     )
 
@@ -216,12 +251,7 @@ def send_cinema_card(chat_id, card_data, video_path_or_url):
     quote = card_data.get('quote', '')
     translation = card_data.get('translation', quote)
     
-    words = quote.split()
-    tags = " ".join([f"#{w.capitalize().replace('.', '')}" for w in words[:6]])
-    if tags:
-        tags += "."
-    
-    caption = format_post_caption(cid, show, tags, quote, translation)
+    caption = format_post_caption(cid, show, word, quote, translation)
 
     keyboard = {
         "inline_keyboard": [
@@ -324,7 +354,8 @@ def bot_polling_loop():
                             kb = {
                                 "keyboard": [
                                     [{"text": "🎬 Случайная карточка"}],
-                                    [{"text": "📚 Все слова колоды (100 сцен)"}]
+                                    [{"text": "📚 Все слова колоды (100 сцен)"}],
+                                    [{"text": "ℹ️ О тренажере"}]
                                 ],
                                 "resize_keyboard": True
                             }
@@ -373,6 +404,31 @@ def bot_polling_loop():
                         # Random scene button
                         if "Случайная" in text or "карточка" in text:
                             send_random_cinema_card(chat_id)
+                            continue
+
+                        # All words catalog button
+                        if "Все слова" in text or "колоды" in text:
+                            words_list = sorted(list(set(c.get("word", "").lower() for c in CARDS if c.get("word"))))
+                            preview_tags = " ".join([f"#{w.capitalize()}" for w in words_list[:35]])
+                            msg_text = (
+                                f"📚 <b>В колоде {len(words_list)} уникальных слов:</b>\n\n"
+                                f"{preview_tags}\n\n"
+                                f"💡 <i>Нажмите на любой хэштег или отправьте слово боту, чтобы получить сцену!</i>"
+                            )
+                            api_call("sendMessage", {"chat_id": chat_id, "text": msg_text, "parse_mode": "HTML"})
+                            continue
+
+                        # About / Help button
+                        if "О тренажере" in text or text.startswith("/help"):
+                            help_text = (
+                                "🎬 <b>Кино-Тренажер «ШАГ 11 НА СЛУХ»</b>\n\n"
+                                "• Каждое видео длится 3.5–8 сек (полный диалог из фильма).\n"
+                                "• Изучаемое слово четко выделено: <code>СЛОВО</code> и <b><u>внутри цитаты</u></b>.\n"
+                                "• По хэштегу <code>#Слово</code> работает быстрый поиск всех карточек в чате.\n"
+                                "• Нажмите на темную плашку (спойлер), чтобы увидеть русский перевод.\n"
+                                "• Напишите любое английское слово в чат — бот найдет видео с ним!"
+                            )
+                            api_call("sendMessage", {"chat_id": chat_id, "text": help_text, "parse_mode": "HTML"})
                             continue
 
                         # If user just sent a word (e.g. "anger", "terrible", "agree")
