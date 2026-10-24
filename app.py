@@ -19,8 +19,9 @@ sys.stdout.reconfigure(encoding='utf-8')
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "8801944551:AAHZdYry40UudaHj2l0hJHE66-KjpC45VKs")
 API_URL = f"https://api.telegram.org/bot{TOKEN}"
 
+import tempfile
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-TMP_DIR = os.path.join(BASE_DIR, "tmp_clips")
+TMP_DIR = os.path.join(tempfile.gettempdir(), "lingua_clips")
 os.makedirs(TMP_DIR, exist_ok=True)
 
 # Headers for cinema databases
@@ -155,16 +156,174 @@ def get_video_duration(file_path):
     except Exception:
         return 0.0
 
-# Load verified high-quality cinema scenes pool (3.5s - 8.0s duration, verified complete sentences)
-VERIFIED_SCENES = []
-VERIFIED_PATH = os.path.join(os.path.dirname(__file__), "verified_scenes.json")
-if os.path.exists(VERIFIED_PATH):
-    try:
-        with open(VERIFIED_PATH, "r", encoding="utf-8") as vf_file:
-            VERIFIED_SCENES = json.load(vf_file)
-        print(f"Loaded {len(VERIFIED_SCENES)} verified cinema scenes into pool.")
-    except Exception as e:
-        print("Error loading verified_scenes.json:", e)
+# 15 Verified high-quality cinema scenes embedded directly (3.5s - 8.0s duration, verified complete sentences)
+VERIFIED_SCENES = [
+    {
+        "id": 223701,
+        "cid": "d6c50085-b466-4c92-aa08-932152db9786",
+        "video_url": "https://y.getyarn.io/d6c50085-b466-4c92-aa08-932152db9786.mp4",
+        "duration": 4.42,
+        "quote": "I need to tell the truth. I need to tell Kirsten.",
+        "title": "The O.C. (2003) - S02E06 Drama",
+        "translation": "Мне нужно сказать правду. Мне нужно сказать Кирстен.",
+        "hashtags": "#I_need #to_tell #the_truth. #I_need #to_tell #Kirsten.",
+        "word": "need"
+    },
+    {
+        "id": 223702,
+        "cid": "3a70c0c6-f895-444c-baab-b0af6841a736",
+        "video_url": "https://y.getyarn.io/3a70c0c6-f895-444c-baab-b0af6841a736.mp4",
+        "duration": 3.56,
+        "quote": "I think I'm thinking what you're thinking.",
+        "title": "A Very Brady Sequel",
+        "translation": "Кажется, я думаю о том же, о чем и ты.",
+        "hashtags": "#I_think #I'm #thinking #what #you're #thinking.",
+        "word": "think"
+    },
+    {
+        "id": 223703,
+        "cid": "ab7da71f-e7fe-465b-8abf-9c9f10cb8f09",
+        "video_url": "https://y.getyarn.io/ab7da71f-e7fe-465b-8abf-9c9f10cb8f09.mp4",
+        "duration": 3.99,
+        "quote": "I don't know what you are talking about.",
+        "title": "The Da Vinci Code (2006)",
+        "translation": "Я не понимаю,  о чём вы говорите.",
+        "hashtags": "#I_don't #know #what #you #are_talking #about.",
+        "word": "don't"
+    },
+    {
+        "id": 223704,
+        "cid": "5ca1934c-64b2-4b64-9530-fd17ab8a92c7",
+        "video_url": "https://y.getyarn.io/5ca1934c-64b2-4b64-9530-fd17ab8a92c7.mp4",
+        "duration": 5.42,
+        "quote": "Why Why did you do this to me Why, why!",
+        "title": "The Transformers (1984) - S02E01 Autobot Spike",
+        "translation": "Почему ты так поступил со мной? Почему, почему!",
+        "hashtags": "#Why #Why #did #you #do #this #to_me #Why, #why!",
+        "word": "this"
+    },
+    {
+        "id": 223705,
+        "cid": "d224319d-d924-413e-a000-5a2f4fa799ec",
+        "video_url": "https://y.getyarn.io/d224319d-d924-413e-a000-5a2f4fa799ec.mp4",
+        "duration": 3.82,
+        "quote": "Baby, I have been waiting all day for this.",
+        "title": "Halloween Ends",
+        "translation": "Детка, я ждал этого весь день.",
+        "hashtags": "#Baby, #I_have_been #waiting #all #day #for_this.",
+        "word": "baby"
+    },
+    {
+        "id": 223706,
+        "cid": "26c75905-8232-424b-859a-7e93d8d02824",
+        "video_url": "https://y.getyarn.io/26c75905-8232-424b-859a-7e93d8d02824.mp4",
+        "duration": 4.19,
+        "quote": "Don't you understand what this night means to me.",
+        "title": "The Goldbergs (2013) - S03E06 Couples Costume",
+        "translation": "Разве ты не понимаешь, что эта ночь значит для меня.",
+        "hashtags": "#Don't #you #understand #what #this #night #means #to_me.",
+        "word": "don't"
+    },
+    {
+        "id": 223707,
+        "cid": "cf6ac374-37b4-4048-af62-19c4d906aa85",
+        "video_url": "https://y.getyarn.io/cf6ac374-37b4-4048-af62-19c4d906aa85.mp4",
+        "duration": 4.23,
+        "quote": "I just wanted to be honest with you.",
+        "title": "Sex and the City (1998) - S03E12 Romance",
+        "translation": "Я просто хотела быть честной с тобой.",
+        "hashtags": "#I_just #wanted #to_be #honest #with #you.",
+        "word": "just"
+    },
+    {
+        "id": 223708,
+        "cid": "4a2916d8-9442-4c9d-b54c-7c2a891ffdce",
+        "video_url": "https://y.getyarn.io/4a2916d8-9442-4c9d-b54c-7c2a891ffdce.mp4",
+        "duration": 3.7,
+        "quote": "What are they doing here, right now What are you doing here!",
+        "title": "Lost (2004-2010) S03E09 Stranger in a Strange Land",
+        "translation": "Что они здесь делают, прямо сейчас Что ты здесь делаешь!",
+        "hashtags": "#What #are_they_doing #here, #right #now #What #are_you #doing #here!",
+        "word": "what"
+    },
+    {
+        "id": 223709,
+        "cid": "701b5ba2-9927-4dd1-8d83-c41fc3c015eb",
+        "video_url": "https://y.getyarn.io/701b5ba2-9927-4dd1-8d83-c41fc3c015eb.mp4",
+        "duration": 5.0,
+        "quote": "Daddy will never let anything happen to you.",
+        "title": "Duncanville (2020) - S02E07 That Jing You Do",
+        "translation": "Папа никогда не позволит, чтобы с тобой что-то случилось.",
+        "hashtags": "#Daddy #will #never #let #anything #happen #to_you.",
+        "word": "daddy"
+    },
+    {
+        "id": 223710,
+        "cid": "9e0d4133-2073-4353-a80e-9bd5080c326f",
+        "video_url": "https://y.getyarn.io/9e0d4133-2073-4353-a80e-9bd5080c326f.mp4",
+        "duration": 3.92,
+        "quote": "Please, can you just tell the truth.",
+        "title": "Breaking Bad (2008) - S05E12 Drama",
+        "translation": "Пожалуйста, ты можешь просто сказать правду.",
+        "hashtags": "#Please, #can #you #just #tell #the_truth.",
+        "word": "please"
+    },
+    {
+        "id": 223711,
+        "cid": "808e0f18-684f-4583-bb1e-b3cfbee1f941",
+        "video_url": "https://y.getyarn.io/808e0f18-684f-4583-bb1e-b3cfbee1f941.mp4",
+        "duration": 4.07,
+        "quote": "But never have I seen anything like this.",
+        "title": "Leap of Faith (1992)",
+        "translation": "Но я никогда не видел ничего подобного.",
+        "hashtags": "#But #never #have_I_seen #anything #like #this.",
+        "word": "never"
+    },
+    {
+        "id": 223712,
+        "cid": "495291d3-4ba5-4c2e-83c7-a8d8a9fc2c96",
+        "video_url": "https://y.getyarn.io/495291d3-4ba5-4c2e-83c7-a8d8a9fc2c96.mp4",
+        "duration": 4.57,
+        "quote": "Control is an illusion. Nobody knows what's going to happen next.",
+        "title": "Days of Thunder",
+        "translation": "Контроль - это иллюзия. Никто не знает, что будет дальше.",
+        "hashtags": "#Control #is_an_illusion. #Nobody #knows #what's #going #to_happen #next.",
+        "word": "control"
+    },
+    {
+        "id": 223713,
+        "cid": "cd92e717-1b0f-424c-b796-15920a7e64d0",
+        "video_url": "https://y.getyarn.io/cd92e717-1b0f-424c-b796-15920a7e64d0.mp4",
+        "duration": 4.9,
+        "quote": "We have to get out of here now!",
+        "title": "Ben 10 (2005) - S02E13 Back with a Vengeance",
+        "translation": "Нам нужно убираться отсюда!",
+        "hashtags": "#We_have_to #get #out #of_here #now!",
+        "word": "have"
+    },
+    {
+        "id": 223714,
+        "cid": "d243f0f3-4d70-456a-ad68-83d61da8b92e",
+        "video_url": "https://y.getyarn.io/d243f0f3-4d70-456a-ad68-83d61da8b92e.mp4",
+        "duration": 3.93,
+        "quote": "I thought you were never coming back.",
+        "title": "Devious Maids (2013) - S02E01 Drama",
+        "translation": "Я думала, ты никогда не вернешься.",
+        "hashtags": "#I_thought #you #were_never #coming #back.",
+        "word": "thought"
+    },
+    {
+        "id": 223715,
+        "cid": "298df49b-dd73-4d27-82de-841088a980b1",
+        "video_url": "https://y.getyarn.io/298df49b-dd73-4d27-82de-841088a980b1.mp4",
+        "duration": 3.72,
+        "quote": "You are going to do this for me.",
+        "title": "Superman III (1983)",
+        "translation": "Ты сделаешь это для меня.",
+        "hashtags": "#You #are_going #to_do #this #for_me.",
+        "word": "going"
+    }
+]
 
 # Fetch a live scene from cinema database with duration & punctuation rules
 def fetch_live_cinema_scene(query):
@@ -248,20 +407,21 @@ def fetch_live_cinema_scene(query):
     return None
 
 # Format telegram post caption: EXACT 1-TO-1 COPY OF «ШАГ 11 НА СЛУХ» (Screenshot 2)
-def format_cinema_post(cid, quote, translation, hashtags):
+def format_cinema_post(cid, quote, translation, hashtags, show=None):
     q_esc = html.escape(quote or "", quote=False)
     tr_esc = html.escape(translation or "", quote=False)
     tags_esc = html.escape(hashtags or "", quote=False)
+    show_esc = html.escape(show or "", quote=False)
 
-    # Line 1: just the card ID (e.g. 223705)
-    # Inside <tg-spoiler>: hashtags on each word, quote in blockquote, Russian translation
+    title_part = f"<b>{cid} • 🎬 {show_esc}</b>" if show_esc else f"<b>{cid}</b>"
+
+    # In Telegram HTML, <tg-spoiler> CANNOT enclose blockquote!
+    # Instead, we spoiler hashtags, blockquote the quote, and spoiler the translation:
     return (
-        f"<b>{cid}</b>\n\n"
-        f"<tg-spoiler>"
-        f"{tags_esc}\n\n"
+        f"{title_part}\n\n"
+        f"<tg-spoiler>{tags_esc}</tg-spoiler>\n\n"
         f"<blockquote>\"{q_esc}\"</blockquote>\n\n"
-        f"{tr_esc}"
-        f"</tg-spoiler>"
+        f"<tg-spoiler>{tr_esc}</tg-spoiler>"
     )
 
 # Send video post with buttons (supports local file or direct URL)
@@ -271,8 +431,9 @@ def send_cinema_card(chat_id, card_data, video_path_or_url):
     translation = card_data.get('translation', quote)
     hashtags = card_data.get('hashtags') or build_quote_hashtags(quote)
     word = card_data.get('word') or 'scene'
+    show = card_data.get('show') or card_data.get('title') or ''
 
-    caption = format_cinema_post(cid, quote, translation, hashtags)
+    caption = format_cinema_post(cid, quote, translation, hashtags, show)
 
     keyboard = {
         "inline_keyboard": [
@@ -288,7 +449,6 @@ def send_cinema_card(chat_id, card_data, video_path_or_url):
 
     try:
         if isinstance(video_path_or_url, str) and (video_path_or_url.startswith("http://") or video_path_or_url.startswith("https://")):
-            # Download before sending to avoid Telegram IP blocks on y.getyarn.io
             temp_dest = os.path.join(TMP_DIR, f"url_{cid}.mp4")
             c_resp = requests.get(video_path_or_url, headers=BROWSER_HEADERS, timeout=8)
             if c_resp.status_code == 200 and len(c_resp.content) > 10000:
@@ -298,18 +458,39 @@ def send_cinema_card(chat_id, card_data, video_path_or_url):
 
         if os.path.exists(video_path_or_url):
             with open(video_path_or_url, "rb") as vf:
-                api_call("sendVideo", params={
+                resp = api_call("sendVideo", params={
                     "chat_id": chat_id,
                     "caption": caption,
                     "parse_mode": "HTML",
                     "reply_markup": json.dumps(keyboard)
                 }, files={"video": (os.path.basename(video_path_or_url), vf)})
+
+            # Fail-safe retry with pure spoiler caption if Telegram entity parsing fails
+            if not resp or not resp.get("ok"):
+                print(f"Telegram parse error ({resp}). Retrying with safe spoiler caption...")
+                q_safe = html.escape(quote, quote=False)
+                tr_safe = html.escape(translation, quote=False)
+                tg_safe = html.escape(hashtags, quote=False)
+                show_safe = html.escape(show, quote=False)
+                title_line = f"<b>{cid} • 🎬 {show_safe}</b>" if show_safe else f"<b>{cid}</b>"
+                safe_caption = f"{title_line}\n\n<tg-spoiler>{tg_safe}\n\n\"{q_safe}\"\n\n{tr_safe}</tg-spoiler>"
+                with open(video_path_or_url, "rb") as vf:
+                    resp = api_call("sendVideo", params={
+                        "chat_id": chat_id,
+                        "caption": safe_caption,
+                        "parse_mode": "HTML",
+                        "reply_markup": json.dumps(keyboard)
+                    }, files={"video": (os.path.basename(video_path_or_url), vf)})
+
             try: os.remove(video_path_or_url)
             except Exception: pass
+            return resp
         else:
             print("Video source not accessible:", video_path_or_url)
+            return None
     except Exception as e:
         print("Error sending video post:", e)
+        return None
 
 # Send random verified live scene - NEVER FAILS, delivers in < 1 second!
 def send_random_cinema_card(chat_id):
@@ -317,29 +498,32 @@ def send_random_cinema_card(chat_id):
     
     # 1. First priority: instant verified cinema scene from pool
     if VERIFIED_SCENES:
-        card = random.choice(VERIFIED_SCENES)
-        clip_url = card["video_url"]
-        temp_dest = os.path.join(TMP_DIR, f"{card.get('cid', card.get('id'))}.mp4")
-        try:
-            r = requests.get(clip_url, headers=BROWSER_HEADERS, timeout=8)
-            if r.status_code == 200 and len(r.content) > 10000:
-                with open(temp_dest, "wb") as f:
-                    f.write(r.content)
-                send_cinema_card(chat_id, card, temp_dest)
-                return
-        except Exception as e:
-            print(f"Error sending verified card: {e}")
-            if os.path.exists(temp_dest):
-                try: os.remove(temp_dest)
-                except Exception: pass
+        for attempt in range(len(VERIFIED_SCENES)):
+            card = random.choice(VERIFIED_SCENES)
+            clip_url = card["video_url"]
+            temp_dest = os.path.join(TMP_DIR, f"{card.get('cid', card.get('id'))}.mp4")
+            try:
+                r = requests.get(clip_url, headers=BROWSER_HEADERS, timeout=8)
+                if r.status_code == 200 and len(r.content) > 10000:
+                    with open(temp_dest, "wb") as f:
+                        f.write(r.content)
+                    res = send_cinema_card(chat_id, card, temp_dest)
+                    if res and res.get("ok"):
+                        return
+            except Exception as e:
+                print(f"Error sending verified card: {e}")
+                if os.path.exists(temp_dest):
+                    try: os.remove(temp_dest)
+                    except Exception: pass
 
     # 2. Live fallback if pool failed
     for _ in range(2):
         w = random.choice(CONVERSATION_WORDS)
         scene = fetch_live_cinema_scene(w)
         if scene:
-            send_cinema_card(chat_id, scene, scene["file_path"])
-            return
+            res = send_cinema_card(chat_id, scene, scene["file_path"])
+            if res and res.get("ok"):
+                return
 
     # In extreme case if everything failed
     api_call("sendMessage", {"chat_id": chat_id, "text": "🎬 Сервер кинобазы обновляется, попробуйте через пару секунд!"})
