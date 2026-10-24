@@ -182,7 +182,7 @@ VERIFIED_SCENES = [
         "quote": "I think I'm thinking what you're thinking.",
         "title": "A Very Brady Sequel",
         "translation": "Кажется, я думаю о том же, о чем и ты.",
-        "hashtags": "#I_think #I'm #thinking #what #you're #thinking.",
+        "hashtags": "#I_think #I_m #thinking #what #you_re #thinking.",
         "word": "think"
     },
     {
@@ -193,7 +193,7 @@ VERIFIED_SCENES = [
         "quote": "I don't know what you are talking about.",
         "title": "The Da Vinci Code (2006)",
         "translation": "Я не понимаю,  о чём вы говорите.",
-        "hashtags": "#I_don't #know #what #you #are_talking #about.",
+        "hashtags": "#I_don_t #know #what #you #are_talking #about.",
         "word": "don't"
     },
     {
@@ -226,7 +226,7 @@ VERIFIED_SCENES = [
         "quote": "Don't you understand what this night means to me.",
         "title": "The Goldbergs (2013) - S03E06 Couples Costume",
         "translation": "Разве ты не понимаешь, что эта ночь значит для меня.",
-        "hashtags": "#Don't #you #understand #what #this #night #means #to_me.",
+        "hashtags": "#Don_t #you #understand #what #this #night #means #to_me.",
         "word": "don't"
     },
     {
@@ -292,7 +292,7 @@ VERIFIED_SCENES = [
         "quote": "Control is an illusion. Nobody knows what's going to happen next.",
         "title": "Days of Thunder",
         "translation": "Контроль - это иллюзия. Никто не знает, что будет дальше.",
-        "hashtags": "#Control #is_an_illusion. #Nobody #knows #what's #going #to_happen #next.",
+        "hashtags": "#Control #is_an_illusion. #Nobody #knows #what_s #going #to_happen #next.",
         "word": "control"
     },
     {
@@ -327,6 +327,50 @@ VERIFIED_SCENES = [
         "translation": "Ты сделаешь это для меня.",
         "hashtags": "#You #are_going #to_do #this #for_me.",
         "word": "going"
+    },
+    {
+        "id": 223716,
+        "cid": "f513d7e2-db77-43d8-9bf4-f7004b5be533",
+        "video_url": "https://y.getyarn.io/f513d7e2-db77-43d8-9bf4-f7004b5be533.mp4",
+        "duration": 3.5,
+        "quote": "Tell me about it.",
+        "title": "The Office (2005) - S08E21 Angry Andy",
+        "translation": "И не говори! / Расскажи мне об этом.",
+        "hashtags": "#Tell_me #about_it.",
+        "word": "about"
+    },
+    {
+        "id": 223717,
+        "cid": "2fce3aa6-a225-4e3a-bb2d-9aae65838a87",
+        "video_url": "https://y.getyarn.io/2fce3aa6-a225-4e3a-bb2d-9aae65838a87.mp4",
+        "duration": 3.5,
+        "quote": "Don't worry about it.",
+        "title": "That '70s Show (1998) - S07E10",
+        "translation": "Не беспокойся об этом.",
+        "hashtags": "#Don_t #worry #about_it.",
+        "word": "about"
+    },
+    {
+        "id": 223718,
+        "cid": "bd2a8ecc-6d12-4711-83f3-682d4f8d925b",
+        "video_url": "https://y.getyarn.io/bd2a8ecc-6d12-4711-83f3-682d4f8d925b.mp4",
+        "duration": 3.5,
+        "quote": "Think about it.",
+        "title": "Ozark (2017) - S03E03 Kevin Cronin Was Here",
+        "translation": "Подумай об этом.",
+        "hashtags": "#Think #about_it.",
+        "word": "about"
+    },
+    {
+        "id": 223719,
+        "cid": "283bd8fa-6a97-4036-b97f-069941ce93b3",
+        "video_url": "https://y.getyarn.io/283bd8fa-6a97-4036-b97f-069941ce93b3.mp4",
+        "duration": 3.5,
+        "quote": "What are you talking about?",
+        "title": "Ozark (2017) - S01E07 Nest Box",
+        "translation": "О чем ты говоришь?",
+        "hashtags": "#What_are_you #talking #about?",
+        "word": "about"
     }
 ]
 
