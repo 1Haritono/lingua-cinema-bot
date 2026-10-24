@@ -339,5 +339,60 @@
         "word": "please",
         "duration": 3.5,
         "video_url": "https://y.getyarn.io/1a87ab21-3391-41b2-af36-c473daf39d4a.mp4"
+    },
+    {
+        "id": 223732,
+        "cid": "51c4882a-eff7-466c-9ead-9e170cde60d7",
+        "video_url": "https://y.getyarn.io/51c4882a-eff7-466c-9ead-9e170cde60d7.mp4",
+        "duration": 3.5,
+        "quote": "I need help, I need your help.",
+        "title": "The Outer Limits (1963) - S02E05",
+        "translation": "Мне нужна помощь, мне нужна твоя помощь.",
+        "hashtags": "#need #help #need #your #help",
+        "word": "help"
+    },
+    {
+        "id": 223733,
+        "cid": "e313720c-87e2-4e35-87f3-0ad31309a57f",
+        "video_url": "https://y.getyarn.io/e313720c-87e2-4e35-87f3-0ad31309a57f.mp4",
+        "duration": 3.5,
+        "quote": "I need your help.",
+        "title": "Knight Rider (1982) - S02E10",
+        "translation": "Мне нужна твоя помощь.",
+        "hashtags": "#need #your #help",
+        "word": "help"
+    },
+    {
+        "id": 223734,
+        "cid": "e8f6ad46-0af7-464a-a3ff-68e9bffb0033",
+        "video_url": "https://y.getyarn.io/e8f6ad46-0af7-464a-a3ff-68e9bffb0033.mp4",
+        "duration": 3.5,
+        "quote": "I need your help. I need your help, Dave.",
+        "title": "Concussion (2015)",
+        "translation": "Мне нужна твоя помощь, Дейв.",
+        "hashtags": "#need #your #help #need #your #help #Dave",
+        "word": "help"
+    },
+    {
+        "id": 223735,
+        "cid": "9ded250e-9309-4b4c-9a29-8ebd8a6ae6d0",
+        "video_url": "https://y.getyarn.io/9ded250e-9309-4b4c-9a29-8ebd8a6ae6d0.mp4",
+        "duration": 3.5,
+        "quote": "Help! Help!",
+        "title": "Better Call Saul (2015) - S01E04",
+        "translation": "Помогите! Помогите!",
+        "hashtags": "#Help #Help",
+        "word": "help"
+    },
+    {
+        "id": 223736,
+        "cid": "49965132-2f43-4abd-aa98-51d218f0a73c",
+        "video_url": "https://y.getyarn.io/49965132-2f43-4abd-aa98-51d218f0a73c.mp4",
+        "duration": 3.5,
+        "quote": "Help me.",
+        "title": "He's Just Not That Into You (2009)",
+        "translation": "Помоги мне.",
+        "hashtags": "#Help #me",
+        "word": "help"
     }
 ]

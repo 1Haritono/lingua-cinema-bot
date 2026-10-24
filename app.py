@@ -503,6 +503,61 @@ VERIFIED_SCENES = [
         "word": "please",
         "duration": 3.5,
         "video_url": "https://y.getyarn.io/1a87ab21-3391-41b2-af36-c473daf39d4a.mp4"
+    },
+    {
+        "id": 223732,
+        "cid": "51c4882a-eff7-466c-9ead-9e170cde60d7",
+        "video_url": "https://y.getyarn.io/51c4882a-eff7-466c-9ead-9e170cde60d7.mp4",
+        "duration": 3.5,
+        "quote": "I need help, I need your help.",
+        "title": "The Outer Limits (1963) - S02E05",
+        "translation": "Мне нужна помощь, мне нужна твоя помощь.",
+        "hashtags": "#need #help #need #your #help",
+        "word": "help"
+    },
+    {
+        "id": 223733,
+        "cid": "e313720c-87e2-4e35-87f3-0ad31309a57f",
+        "video_url": "https://y.getyarn.io/e313720c-87e2-4e35-87f3-0ad31309a57f.mp4",
+        "duration": 3.5,
+        "quote": "I need your help.",
+        "title": "Knight Rider (1982) - S02E10",
+        "translation": "Мне нужна твоя помощь.",
+        "hashtags": "#need #your #help",
+        "word": "help"
+    },
+    {
+        "id": 223734,
+        "cid": "e8f6ad46-0af7-464a-a3ff-68e9bffb0033",
+        "video_url": "https://y.getyarn.io/e8f6ad46-0af7-464a-a3ff-68e9bffb0033.mp4",
+        "duration": 3.5,
+        "quote": "I need your help. I need your help, Dave.",
+        "title": "Concussion (2015)",
+        "translation": "Мне нужна твоя помощь, Дейв.",
+        "hashtags": "#need #your #help #need #your #help #Dave",
+        "word": "help"
+    },
+    {
+        "id": 223735,
+        "cid": "9ded250e-9309-4b4c-9a29-8ebd8a6ae6d0",
+        "video_url": "https://y.getyarn.io/9ded250e-9309-4b4c-9a29-8ebd8a6ae6d0.mp4",
+        "duration": 3.5,
+        "quote": "Help! Help!",
+        "title": "Better Call Saul (2015) - S01E04",
+        "translation": "Помогите! Помогите!",
+        "hashtags": "#Help #Help",
+        "word": "help"
+    },
+    {
+        "id": 223736,
+        "cid": "49965132-2f43-4abd-aa98-51d218f0a73c",
+        "video_url": "https://y.getyarn.io/49965132-2f43-4abd-aa98-51d218f0a73c.mp4",
+        "duration": 3.5,
+        "quote": "Help me.",
+        "title": "He's Just Not That Into You (2009)",
+        "translation": "Помоги мне.",
+        "hashtags": "#Help #me",
+        "word": "help"
     }
 ]
 
@@ -557,10 +612,13 @@ def choose_best_match(matches, chat_id=None, exclude_id=None):
     hist = get_seen_cards(chat_id) if chat_id else []
     seen_set = set(hist)
 
-    # 1. Filter out excluded cards if other options exist
+    # 1. Strictly filter out excluded cards (NEVER repeat current/last card!)
     candidates = [m for m in matches if str(m.get("id")) not in excluded]
     if not candidates:
-        candidates = matches
+        # Fallback to other fresh scenes from the verified collection to guarantee no repeat!
+        candidates = [s for s in VERIFIED_SCENES if str(s.get("id")) not in excluded]
+        if not candidates:
+            candidates = VERIFIED_SCENES
 
     # 2. Priority: Unseen cards among candidates
     unseen = [m for m in candidates if str(m.get("id")) not in seen_set]
@@ -1088,7 +1146,7 @@ def read_root():
     return {
         "status": "online",
         "service": "Lingua Magic Cinema Bot 24/7 (Live Dynamic Database)",
-        "version": "2.10.0 (31 Verified Scenes, 7x Please Pool, Movies & Anime Guide)",
+        "version": "2.11.0 (36 Verified Scenes, 6x Help Pool, Zero-Repeat Fallback)",
         "verified_scenes": len(VERIFIED_SCENES),
         "uptime": "24/7 online"
     }
