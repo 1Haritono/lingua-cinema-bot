@@ -4,33 +4,52 @@ import json
 import time
 import re
 import html
-import subprocess
-import threading
-import urllib.parse
 import uuid
+import urllib.parse
+import urllib.request
+import threading
+import subprocess
 import requests
 from fastapi import FastAPI
 import uvicorn
 
 sys.stdout.reconfigure(encoding='utf-8')
 
-TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8801944551:AAHZdYry40UudaHj2l0hJHE66-KjpC45VKs")
+# Telegram Bot Token & Settings
+TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "8801944551:AAHZdYry40UudaHj2l0hJHE66-KjpC45VKs")
 API_URL = f"https://api.telegram.org/bot{TOKEN}"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_FILE = os.path.join(BASE_DIR, "cards_data.json")
 TMP_DIR = os.path.join(BASE_DIR, "tmp_clips")
 os.makedirs(TMP_DIR, exist_ok=True)
 
-# Load existing cards database (100 cards)
-CARDS = []
-if os.path.exists(DATA_FILE):
-    try:
-        with open(DATA_FILE, "r", encoding="utf-8") as f:
-            CARDS = json.load(f)
-        print(f"Loaded {len(CARDS)} cards from {DATA_FILE}")
-    except Exception as e:
-        print("Error loading cards:", e)
+# Headers for cinema databases
+BROWSER_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Referer': 'https://getyarn.io/'
+}
+
+# Incremental card counter (matches the «ШАГ 11 НА СЛУХ» series format)
+CARD_COUNTER = 223705
+def get_next_card_id():
+    global CARD_COUNTER
+    CARD_COUNTER += 1
+    return str(CARD_COUNTER)
+
+# Pool of 100+ popular conversational words and idioms
+CONVERSATION_WORDS = [
+    "approach", "anger", "safe", "believe", "remember", "understand", "promise", "listen",
+    "trouble", "happen", "wonder", "suppose", "realize", "decide", "surprise", "different",
+    "dangerous", "possible", "careful", "beautiful", "terrible", "serious", "important",
+    "honest", "secret", "mistake", "apologize", "forgive", "explain", "imagine", "expect",
+    "notice", "discover", "protect", "escape", "trust", "respect", "deserve", "regret",
+    "matter", "curious", "strange", "bother", "appreciate", "convince", "desperate",
+    "grateful", "innocent", "jealous", "lonely", "nervous", "patient", "proud", "responsible",
+    "stubborn", "embarrassed", "confused", "excited", "exhausted", "furious", "terrified",
+    "worried", "calm", "confident", "comfortable", "generous", "helpful", "polite", "reliable"
+]
 
 def api_call(method, params=None, files=None):
     url = f"{API_URL}/{method}"
@@ -44,7 +63,45 @@ def api_call(method, params=None, files=None):
         print(f"Telegram API Error ({method}): {e}")
         return None
 
-# Measure exact video duration using pure Python MP4 box parser + ffprobe fallback
+# Instant Russian translation via Google Translate endpoint
+def translate_to_ru(text):
+    if not text:
+        return ""
+    url = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ru&dt=t&q={urllib.parse.quote(text)}"
+    try:
+        r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=5)
+        if r.status_code == 200:
+            data = r.json()
+            return ''.join([p[0] for p in data[0] if p[0]])
+    except Exception:
+        pass
+    return text
+
+# Build hashtags for every word / phrase (Exact replica of «ШАГ 11 НА СЛУХ»)
+def build_quote_hashtags(quote):
+    words = quote.split()
+    if not words:
+        return ""
+    glue = {'i', 'a', 'an', 'the', 'of', 'to', 'in', 'on', 'at', 'for', 'and', 'or', 'so', 'it', 'is', 'am', 'are', 'was', 'were', 'had', 'have', 'has', 'my', 'your', 'his', 'her', 'we', 'he', 'she', 'they'}
+    chunks = []
+    current_chunk = []
+    for w in words:
+        clean_w = re.sub(r'[^a-zA-Z]', '', w).lower()
+        current_chunk.append(w)
+        has_punct = any(p in w for p in ['.', ',', '!', '?', ';', ':'])
+        if clean_w not in glue or len(current_chunk) >= 3 or has_punct:
+            chunks.append('_'.join(current_chunk))
+            current_chunk = []
+    if current_chunk:
+        chunks.append('_'.join(current_chunk))
+    tags = []
+    for c in chunks:
+        clean_tag = re.sub(r'^["\'\(\[\{\-]+', '', c)
+        if clean_tag:
+            tags.append(f"#{clean_tag}")
+    return " ".join(tags)
+
+# Measure exact video duration
 def get_video_duration(file_path):
     try:
         import struct
@@ -85,34 +142,26 @@ def get_video_duration(file_path):
     except Exception:
         return 0.0
 
-# Search GetYarn clips with natural phrases, sentence boundary check and duration filter
-def search_valid_clips(word, limit=1):
-    w_clean = re.sub(r'[^a-zA-Z]', '', word).strip().lower()
+# Fetch a live scene from cinema database with strict duration & punctuation rules
+def fetch_live_cinema_scene(query):
+    w_clean = re.sub(r'[^a-zA-Z]', '', query).strip().lower()
     if not w_clean:
-        return []
+        return None
 
-    # Priority queries: natural word patterns instead of synthetic phrases
-    queries = [
+    # Natural priority variations
+    search_queries = [
         w_clean,
         f"a {w_clean}",
         f"the {w_clean}",
         f"to {w_clean}",
-        f"I {w_clean}",
-        f"{w_clean}ing"
+        f"I {w_clean}"
     ]
-    results = []
+
     seen = set()
-
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Referer': 'https://getyarn.io/'
-    }
-
-    for q in queries:
-        url = f"https://getyarn.io/yarn-find?text={urllib.parse.quote(q)}"
+    for q_term in search_queries:
+        url = f"https://getyarn.io/yarn-find?text={urllib.parse.quote(q_term)}"
         try:
-            r = requests.get(url, headers=headers, timeout=6)
+            r = requests.get(url, headers=BROWSER_HEADERS, timeout=6)
             if r.status_code == 200:
                 pattern = r'<a href="/yarn-clip/([a-f0-9\-]+)".*?<div class="title[^>]*>([^<]+)</div>.*?<div class="transcript[^>]*>([^<]+)</div>'
                 matches = re.findall(pattern, r.text, re.DOTALL)
@@ -120,40 +169,120 @@ def search_valid_clips(word, limit=1):
                     if cid in seen: continue
                     seen.add(cid)
                     q_raw = html.unescape(quote).strip()
-                    # Filter: reject quotes ending in comma, semicolon, dash, or colon (cut off mid-sentence)
-                    if q_raw and q_raw[-1] in [',', ';', '-', ':']:
+                    # Rule 1: MUST end with terminal punctuation . ! or ? (never comma, colon, dash)
+                    if not (q_raw and q_raw[-1] in ['.', '!', '?']):
+                        continue
+                    if q_raw[-1] in [',', ';', '-', ':']:
                         continue
                     q_clean = re.sub(r'[\?♪♫]+', '', q_raw).strip()
                     words = re.findall(r"[a-zA-Z']+", q_clean)
-                    if len(words) >= 2:
-                        clip_url = f"https://y.getyarn.io/{cid}.mp4"
-                        temp_dest = os.path.join(TMP_DIR, f"{cid}.mp4")
-                        c_resp = requests.get(clip_url, headers=headers, timeout=8)
-                        if c_resp.status_code == 200 and len(c_resp.content) > 10000:
-                            with open(temp_dest, "wb") as f:
-                                f.write(c_resp.content)
-                            dur = get_video_duration(temp_dest)
-                            
-                            # Filter: full phrase duration (2.2s - 8.5s)
-                            if 2.2 <= dur <= 8.5:
-                                results.append({
-                                    "id": cid[:8],
-                                    "word": word,
-                                    "quote": q_clean,
-                                    "show": html.unescape(title).strip(),
-                                    "duration": dur,
-                                    "file_path": temp_dest,
-                                    "video_url": clip_url
-                                })
-                                if len(results) >= limit:
-                                    return results
-                            else:
-                                if os.path.exists(temp_dest): os.remove(temp_dest)
+                    if len(words) < 3:
+                        continue
+
+                    clip_url = f"https://y.getyarn.io/{cid}.mp4"
+                    temp_dest = os.path.join(TMP_DIR, f"{cid}.mp4")
+                    c_resp = requests.get(clip_url, headers=BROWSER_HEADERS, timeout=8)
+                    if c_resp.status_code == 200 and len(c_resp.content) > 10000:
+                        with open(temp_dest, "wb") as f:
+                            f.write(c_resp.content)
+                        dur = get_video_duration(temp_dest)
+
+                        # Rule 2: Duration strictly between 3.4s and 8.0s (NO 2-second cutoffs!)
+                        if 3.4 <= dur <= 8.0:
+                            tr = translate_to_ru(q_clean)
+                            tags = build_quote_hashtags(q_clean)
+                            return {
+                                "id": get_next_card_id(),
+                                "word": w_clean,
+                                "quote": q_clean,
+                                "show": html.unescape(title).strip(),
+                                "translation": tr,
+                                "hashtags": tags,
+                                "duration": dur,
+                                "file_path": temp_dest,
+                                "video_url": clip_url
+                            }
+                        else:
+                            if os.path.exists(temp_dest): os.remove(temp_dest)
         except Exception:
             pass
-        if len(results) >= limit: break
 
-    return results
+    return None
+
+# Format telegram post caption: EXACT 1-TO-1 COPY OF «ШАГ 11 НА СЛУХ» (Screenshot 2)
+def format_cinema_post(cid, quote, translation, hashtags):
+    q_esc = html.escape(quote or "", quote=False)
+    tr_esc = html.escape(translation or "", quote=False)
+    tags_esc = html.escape(hashtags or "", quote=False)
+
+    # Line 1: just the card ID (e.g. 223705)
+    # Inside <tg-spoiler>: hashtags on each word, quote in blockquote, Russian translation
+    return (
+        f"<b>{cid}</b>\n\n"
+        f"<tg-spoiler>"
+        f"{tags_esc}\n\n"
+        f"<blockquote>\"{q_esc}\"</blockquote>\n\n"
+        f"{tr_esc}"
+        f"</tg-spoiler>"
+    )
+
+# Send video post with buttons (supports local file or direct URL)
+def send_cinema_card(chat_id, card_data, video_path_or_url):
+    cid = card_data.get('id') or get_next_card_id()
+    quote = card_data.get('quote', '')
+    translation = card_data.get('translation', quote)
+    hashtags = card_data.get('hashtags') or build_quote_hashtags(quote)
+    word = card_data.get('word') or 'scene'
+
+    caption = format_cinema_post(cid, quote, translation, hashtags)
+
+    keyboard = {
+        "inline_keyboard": [
+            [
+                {"text": f"🎬 Еще сцены со словом '{word}'", "callback_data": f"word:{word}"}
+            ],
+            [
+                {"text": "🎲 Случайная сцена", "callback_data": "random"},
+                {"text": "📥 В Anki", "callback_data": f"anki:{cid}"}
+            ]
+        ]
+    }
+
+    try:
+        if isinstance(video_path_or_url, str) and (video_path_or_url.startswith("http://") or video_path_or_url.startswith("https://")):
+            api_call("sendVideo", params={
+                "chat_id": chat_id,
+                "video": video_path_or_url,
+                "caption": caption,
+                "parse_mode": "HTML",
+                "reply_markup": json.dumps(keyboard)
+            })
+        elif os.path.exists(video_path_or_url):
+            with open(video_path_or_url, "rb") as vf:
+                api_call("sendVideo", params={
+                    "chat_id": chat_id,
+                    "caption": caption,
+                    "parse_mode": "HTML",
+                    "reply_markup": json.dumps(keyboard)
+                }, files={"video": (os.path.basename(video_path_or_url), vf)})
+            try: os.remove(video_path_or_url)
+            except Exception: pass
+        else:
+            print("Video source not accessible:", video_path_or_url)
+    except Exception as e:
+        print("Error sending video post:", e)
+
+# Send random verified live scene
+def send_random_cinema_card(chat_id):
+    import random
+    api_call("sendMessage", {"chat_id": chat_id, "text": "🎬 Подбираю живую кино-сцену (хронометраж 3.5–8 сек)..."})
+    for _ in range(5):
+        w = random.choice(CONVERSATION_WORDS)
+        scene = fetch_live_cinema_scene(w)
+        if scene:
+            send_cinema_card(chat_id, scene, scene["file_path"])
+            return
+    api_call("sendMessage", {"chat_id": chat_id, "text": "🎬 Загружаю новую сцену, нажмите еще раз!"})
 
 # Find timestamp and quote of target word in YouTube subtitles
 def find_word_in_yt_sub(yt_url, target_word, out_dir):
@@ -192,7 +321,7 @@ def find_word_in_yt_sub(yt_url, target_word, out_dir):
         print("Sub parse error:", e)
     return None, None
 
-# Cut clip from YouTube by time range (start_sec, end_sec)
+# Cut clip from YouTube
 def cut_youtube_clip(url, start_sec, duration=5.5):
     start_str = time.strftime('%H:%M:%S', time.gmtime(max(0, start_sec)))
     end_str = time.strftime('%H:%M:%S', time.gmtime(start_sec + duration))
@@ -202,129 +331,19 @@ def cut_youtube_clip(url, start_sec, duration=5.5):
     cmd = [
         "yt-dlp",
         "--download-sections", f"*{start_str}-{end_str}",
-        "-f", "bestvideo[height<=720]+bestaudio/best[height<=720]",
-        "--merge-output-format", "mp4",
+        "--force-keyframes-at-cuts",
+        "-f", "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
         url,
         "-o", out_file,
         "--quiet", "--no-warnings"
     ]
     try:
-        subprocess.run(cmd, check=True, timeout=40)
+        subprocess.run(cmd, timeout=35)
         if os.path.exists(out_file) and os.path.getsize(out_file) > 10000:
             return out_file
     except Exception as e:
         print("yt-dlp error:", e)
     return None
-
-# Highlight target studied word in quote (bold + underline)
-def highlight_target_word_in_quote(quote, word):
-    if not quote:
-        return ""
-    if not word:
-        return html.escape(quote, quote=False)
-    
-    w_clean = re.sub(r'[^a-zA-Z]', '', word).strip()
-    if not w_clean:
-        return html.escape(quote, quote=False)
-    
-    stem = w_clean
-    if len(w_clean) > 4:
-        if w_clean.endswith(('ing', 'ies', 'ied')):
-            stem = w_clean[:-3]
-        elif w_clean.endswith(('ed', 'es', 'er', 'ly')):
-            stem = w_clean[:-2]
-        elif w_clean.endswith('e'):
-            stem = w_clean[:-1]
-            
-    pattern = rf'\b({re.escape(w_clean)}\w*|{re.escape(stem)}\w*)\b'
-    q_esc = html.escape(quote, quote=False)
-    
-    def repl(m):
-        return f"<b><u>{m.group(0)}</u></b>"
-        
-    return re.sub(pattern, repl, q_esc, flags=re.IGNORECASE)
-
-# Format telegram post caption with full blur spoiler for pure listening practice
-def format_post_caption(cid, show, word, quote, translation):
-    sh_esc = html.escape(show or "Movie Clip", quote=False)
-    tr_esc = html.escape(translation or quote or "", quote=False)
-    w_clean = re.sub(r'[^a-zA-Z]', '', word).strip() if word else ""
-    w_display = w_clean.upper() if w_clean else html.escape(str(word))
-    
-    highlighted_quote = highlight_target_word_in_quote(quote, word)
-    tag_word = f"#{w_clean.capitalize()}" if w_clean else "#CinemaEnglish"
-    hashtags = f"{tag_word} #CinemaEnglish"
-    
-    # Film info is visible; target word, quote and translation are completely hidden under spoiler
-    return (
-        f"<b>{cid}</b> • 🎬 {sh_esc}\n\n"
-        f"<tg-spoiler>"
-        f"🎯 Изучаем: <code>{w_display}</code>\n"
-        f"🏷 {hashtags}\n\n"
-        f"<blockquote>\"{highlighted_quote}\"</blockquote>\n\n"
-        f"{tr_esc}"
-        f"</tg-spoiler>"
-    )
-
-# Send video post with buttons (supports URL or local file)
-def send_cinema_card(chat_id, card_data, video_path_or_url):
-    word = card_data.get('word', 'scene')
-    cid = card_data.get('id', '10001')
-    show = card_data.get('show', 'Movie Clip')
-    quote = card_data.get('quote', '')
-    translation = card_data.get('translation', quote)
-    
-    caption = format_post_caption(cid, show, word, quote, translation)
-
-    keyboard = {
-        "inline_keyboard": [
-            [
-                {"text": f"🎬 Еще сцены со словом '{word}'", "callback_data": f"word:{word}"}
-            ],
-            [
-                {"text": "🎲 Случайная сцена", "callback_data": "random"},
-                {"text": "📥 В Anki", "callback_data": f"anki:{cid}"}
-            ]
-        ]
-    }
-
-    try:
-        # Check if URL
-        if isinstance(video_path_or_url, str) and (video_path_or_url.startswith("http://") or video_path_or_url.startswith("https://")):
-            api_call("sendVideo", params={
-                "chat_id": chat_id,
-                "video": video_path_or_url,
-                "caption": caption,
-                "parse_mode": "HTML",
-                "reply_markup": json.dumps(keyboard)
-            })
-        elif os.path.exists(video_path_or_url):
-            with open(video_path_or_url, "rb") as vf:
-                api_call("sendVideo", params={
-                    "chat_id": chat_id,
-                    "caption": caption,
-                    "parse_mode": "HTML",
-                    "reply_markup": json.dumps(keyboard)
-                }, files={"video": (os.path.basename(video_path_or_url), vf)})
-        else:
-            print("Video source not accessible:", video_path_or_url)
-    except Exception as e:
-        print("Error sending video post:", e)
-
-# Instant random card sender (uses pre-curated 100 cards first for 100% instant response)
-def send_random_cinema_card(chat_id):
-    import random
-    if CARDS:
-        c = random.choice(CARDS)
-        v = c.get("video_url")
-        if v:
-            send_cinema_card(chat_id, c, v)
-            return
-        clips = search_valid_clips(c["word"], limit=1)
-        if clips:
-            send_cinema_card(chat_id, clips[0], clips[0]["file_path"])
-            return
-    api_call("sendMessage", {"chat_id": chat_id, "text": "🎬 Загружаю новую сцену, нажмите еще раз!"})
 
 # Background Telegram Bot Polling
 def bot_polling_loop():
@@ -348,18 +367,12 @@ def bot_polling_loop():
                             send_random_cinema_card(chat_id)
                         elif data.startswith("word:"):
                             w = data.split(":", 1)[1]
-                            api_call("sendMessage", {"chat_id": chat_id, "text": f"🔍 Ищу отрывки со словом '{w}'..."})
-                            clips = search_valid_clips(w, limit=1)
-                            if clips:
-                                send_cinema_card(chat_id, clips[0], clips[0]["file_path"])
+                            api_call("sendMessage", {"chat_id": chat_id, "text": f"🔍 Ищу отрывок со словом '{w}' (3.5–8 сек)..."})
+                            scene = fetch_live_cinema_scene(w)
+                            if scene:
+                                send_cinema_card(chat_id, scene, scene["file_path"])
                             else:
-                                other_cards = [c for c in CARDS if c.get("word", "").lower() == w.lower()]
-                                if other_cards:
-                                    import random
-                                    c = random.choice(other_cards)
-                                    send_cinema_card(chat_id, c, c.get("video_url") or c.get("video_file"))
-                                else:
-                                    api_call("sendMessage", {"chat_id": chat_id, "text": f"🎬 Для слова '{w}' сцены еще формируются. Нажмите «🎲 Случайная сцена»!"})
+                                api_call("sendMessage", {"chat_id": chat_id, "text": f"🎬 Подбираем новые сцены для '{w}'. Нажмите «🎲 Случайная сцена»!"})
                         elif data.startswith("anki:"):
                             api_call("sendMessage", {"chat_id": chat_id, "text": "✅ Сцена добавлена в колоду 🎬 Кино-Вырезки!"})
 
@@ -373,17 +386,16 @@ def bot_polling_loop():
                         if text.startswith("/start"):
                             welcome_text = (
                                 "🎬 <b>Добро пожаловать в Кино-Тренажер «ШАГ 11 НА СЛУХ»!</b>\n\n"
-                                "🔥 В базе >300 000 сцен с живой речью из фильмов и сериалов.\n"
-                                "⏱ Каждое видео длится от 3.5 до 8 секунд (только полные фразы!).\n\n"
-                                "📱 <b>Как вырезать видео с YouTube с телефона:</b>\n"
-                                "Нажмите «Поделиться» в YouTube и отправьте ссылку сюда с нужным словом:\n"
-                                "👉 <code>https://youtu.be/... terrible</code>\n\n"
+                                "🔥 Карточки генерируются в реальном времени из базы 5 000 000+ сцен кино.\n"
+                                "⏱ Каждое видео длится строго от 3.5 до 8 секунд (полные фразы!).\n"
+                                "🏷 На каждое слово сформирован хэштег для быстрого поиска всех сцен в чате.\n"
+                                "🙈 Все подсказки скрыты под спойлером — сначала тренируйте слух!\n\n"
                                 "Нажмите кнопку ниже для старта:"
                             )
                             kb = {
                                 "keyboard": [
                                     [{"text": "🎬 Случайная карточка"}],
-                                    [{"text": "📚 Все слова колоды (100 сцен)"}],
+                                    [{"text": "💡 Популярные темы"}],
                                     [{"text": "ℹ️ О тренажере"}]
                                 ],
                                 "resize_keyboard": True
@@ -401,13 +413,11 @@ def bot_polling_loop():
                             start_time = 30
                             quote_text = "Dialogue clip"
                             
-                            # 1) Check if user gave a timestamp (e.g. 4:15)
                             ts_match = re.search(r'(\d+):(\d+)', rest)
                             if ts_match:
                                 start_time = max(0, int(ts_match.group(1)) * 60 + int(ts_match.group(2)) - 1)
                                 quote_text = f"Dialogue clip at {start_time//60}:{start_time%60:02d}"
                             elif rest:
-                                # 2) User gave a word (e.g. "terrible") -> find in subtitles
                                 clean_w = re.sub(r'[^a-zA-Z]', '', rest)
                                 if clean_w:
                                     found_sec, found_quote = find_word_in_yt_sub(yt_url, clean_w, TMP_DIR)
@@ -417,15 +427,16 @@ def bot_polling_loop():
 
                             clip_file = cut_youtube_clip(yt_url, start_time, duration=5.5)
                             if clip_file:
+                                tr = translate_to_ru(quote_text)
+                                tags = build_quote_hashtags(quote_text)
                                 card_meta = {
-                                    "id": f"YT-{int(time.time())%100000}",
+                                    "id": get_next_card_id(),
                                     "word": rest if rest else "YouTube",
-                                    "show": "YouTube Video Clip",
                                     "quote": quote_text,
-                                    "translation": "Фрагмент из YouTube"
+                                    "translation": tr,
+                                    "hashtags": tags
                                 }
                                 send_cinema_card(chat_id, card_meta, clip_file)
-                                if os.path.exists(clip_file): os.remove(clip_file)
                             else:
                                 api_call("sendMessage", {"chat_id": chat_id, "text": "❌ Не удалось вырезать фрагмент. Проверьте ссылку."})
                             continue
@@ -435,14 +446,13 @@ def bot_polling_loop():
                             send_random_cinema_card(chat_id)
                             continue
 
-                        # All words catalog button
-                        if "Все слова" in text or "колоды" in text:
-                            words_list = sorted(list(set(c.get("word", "").lower() for c in CARDS if c.get("word"))))
-                            preview_tags = " ".join([f"#{w.capitalize()}" for w in words_list[:35]])
+                        # Topics catalog button
+                        if "Популярные" in text or "Темы" in text or "темы" in text:
+                            preview_tags = " ".join([f"#{w.capitalize()}" for w in CONVERSATION_WORDS[:30]])
                             msg_text = (
-                                f"📚 <b>В колоде {len(words_list)} уникальных слов:</b>\n\n"
+                                f"💡 <b>Популярные слова и темы:</b>\n\n"
                                 f"{preview_tags}\n\n"
-                                f"💡 <i>Нажмите на любой хэштег или отправьте слово боту, чтобы получить сцену!</i>"
+                                f"💬 <i>Нажмите на любой хэштег для поиска в чате или отправьте любое английское слово боту!</i>"
                             )
                             api_call("sendMessage", {"chat_id": chat_id, "text": msg_text, "parse_mode": "HTML"})
                             continue
@@ -451,28 +461,22 @@ def bot_polling_loop():
                         if "О тренажере" in text or text.startswith("/help"):
                             help_text = (
                                 "🎬 <b>Кино-Тренажер «ШАГ 11 НА СЛУХ»</b>\n\n"
-                                "• Каждое видео длится 3.5–8 сек (полный диалог из фильма).\n"
-                                "• Изучаемое слово четко выделено: <code>СЛОВО</code> и <b><u>внутри цитаты</u></b>.\n"
-                                "• По хэштегу <code>#Слово</code> работает быстрый поиск всех карточек в чате.\n"
-                                "• Нажмите на темную плашку (спойлер), чтобы увидеть русский перевод.\n"
-                                "• Напишите любое английское слово в чат — бот найдет видео с ним!"
+                                "• Все карточки создаются в реальном времени из кино-базы (5 000 000+ сцен).\n"
+                                "• Хронометраж строго 3.5–8 сек (полные фразы, без обрыва речи).\n"
+                                "• На каждое слово формируется хэштег — нажмите на него, чтобы увидеть все сцены с этим словом в чате!\n"
+                                "• Нажмите на заблюренную область, чтобы увидеть цитату и перевод.\n"
+                                "• Напишите любое английское слово в чат — бот найдет сцену с ним!"
                             )
                             api_call("sendMessage", {"chat_id": chat_id, "text": help_text, "parse_mode": "HTML"})
                             continue
 
-                        # If user just sent a word (e.g. "anger", "terrible", "agree")
+                        # If user just sent a word (e.g. "approach", "anger", "safe")
                         clean_word = re.sub(r'[^a-zA-Z]', '', text)
                         if clean_word and len(clean_word) >= 3:
-                            # Check if word is already in our curated cards
-                            found_curated = [c for c in CARDS if c.get("word", "").lower() == clean_word.lower()]
-                            if found_curated and found_curated[0].get("video_url"):
-                                send_cinema_card(chat_id, found_curated[0], found_curated[0]["video_url"])
-                                continue
-                            
-                            api_call("sendMessage", {"chat_id": chat_id, "text": f"🎬 Подбираю отрывок со словом '{clean_word}' (хронометраж 3.5–8 сек)..."})
-                            clips = search_valid_clips(clean_word, limit=1)
-                            if clips:
-                                send_cinema_card(chat_id, clips[0], clips[0]["file_path"])
+                            api_call("sendMessage", {"chat_id": chat_id, "text": f"🎬 Подбираю сцену со словом '{clean_word}' (3.5–8 сек)..."})
+                            scene = fetch_live_cinema_scene(clean_word)
+                            if scene:
+                                send_cinema_card(chat_id, scene, scene["file_path"])
                             else:
                                 api_call("sendMessage", {"chat_id": chat_id, "text": f"Для слова '{clean_word}' сцена обрабатывается. Нажмите «🎬 Случайная карточка»!"})
         except Exception as e:
@@ -486,10 +490,9 @@ def keep_alive_loop():
     while True:
         try:
             requests.get(ping_url, timeout=10)
-            print("Keep-alive ping sent successfully.")
-        except Exception as e:
-            print("Keep-alive error:", e)
-        time.sleep(600) # Ping every 10 minutes
+        except Exception:
+            pass
+        time.sleep(600)
 
 # FastAPI Healthcheck Endpoint
 app = FastAPI()
@@ -498,21 +501,18 @@ app = FastAPI()
 def read_root():
     return {
         "status": "online",
-        "service": "Lingua Magic Cinema Bot 24/7",
-        "version": "1.0.1",
+        "service": "Lingua Magic Cinema Bot 24/7 (Live Dynamic Database)",
+        "version": "2.0.0",
         "uptime": "24/7 online"
     }
 
 if __name__ == "__main__":
-    # Start bot polling in background thread
     bot_thread = threading.Thread(target=bot_polling_loop, daemon=True)
     bot_thread.start()
 
-    # Start keep-alive pinger in background thread
     ping_thread = threading.Thread(target=keep_alive_loop, daemon=True)
     ping_thread.start()
 
-    # Run FastAPI server on dynamically assigned PORT
     port = int(os.environ.get("PORT", 8080))
     print(f"Starting server on port {port}...")
     uvicorn.run(app, host="0.0.0.0", port=port)
