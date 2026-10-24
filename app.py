@@ -92,7 +92,7 @@ def translate_to_ru(text):
         pass
     return text
 
-# Build hashtags for every word / phrase (Exact replica of «ШАГ 11 НА СЛУХ»)
+# Build hashtags for every word / phrase (Telegram compatible: contractions unified with _)
 def build_quote_hashtags(quote):
     words = quote.split()
     if not words:
@@ -113,6 +113,10 @@ def build_quote_hashtags(quote):
     for c in chunks:
         clean_tag = re.sub(r'^["\'\(\[\{\-]+', '', c)
         if clean_tag:
+            # Replace apostrophes with _ so Telegram treats contractions as ONE unbroken hashtag
+            # e.g. #I'm -> #I_m, #what's -> #what_s, #you're -> #you_re, #don't -> #don_t
+            clean_tag = clean_tag.replace("'", "_")
+            clean_tag = re.sub(r'_+', '_', clean_tag)
             tags.append(f"#{clean_tag}")
     return " ".join(tags)
 
@@ -326,6 +330,16 @@ VERIFIED_SCENES = [
     }
 ]
 
+# Load full expanded scenes from verified_scenes.json if present
+scenes_file = os.path.join(BASE_DIR, "verified_scenes.json")
+if os.path.exists(scenes_file):
+    try:
+        with open(scenes_file, "r", encoding="utf-8") as f:
+            VERIFIED_SCENES = json.load(f)
+            print(f"Loaded {len(VERIFIED_SCENES)} scenes from verified_scenes.json")
+    except Exception as e:
+        print(f"Error loading verified_scenes.json: {e}")
+
 # User seen history to guarantee no repetitive cards
 USER_SEEN_HISTORY = {} # {chat_id: [cid1, cid2, ...]}
 
@@ -437,20 +451,40 @@ def fetch_live_cinema_scene(query, exclude_id=None, chat_id=None):
             card_copy["search_word"] = target_word
             return card_copy
 
-    # If only 1 match exists and it's current, return it
-    card = matches[0]
-    card_id = card.get("id")
-    local_clip = os.path.join(BASE_DIR, "clips", f"clip_{card_id}.mp4")
-    if os.path.exists(local_clip) and os.path.getsize(local_clip) > 10000:
-        card_copy = dict(card)
-        card_copy["file_path"] = local_clip
-        card_copy["search_word"] = target_word
-        return card_copy
+    # Priority 3: If all scenes for this specific word are seen, pick an unseen fresh scene from the collection
+    unseen_fresh = [s for s in VERIFIED_SCENES if str(s.get("id")) not in seen_ids and str(s.get("id")) != str(exclude_id)]
+    if unseen_fresh:
+        card = unseen_fresh[0]
+        card_id = card.get("id")
+        local_clip = os.path.join(BASE_DIR, "clips", f"clip_{card_id}.mp4")
+        if os.path.exists(local_clip) and os.path.getsize(local_clip) > 10000:
+            card_copy = dict(card)
+            card_copy["file_path"] = local_clip
+            card_copy["search_word"] = card.get("word") or "scene"
+            return card_copy
+
+    # If all collection is seen, pick another scene excluding current
+    other_any = [s for s in VERIFIED_SCENES if str(s.get("id")) != str(exclude_id)]
+    if other_any:
+        card = other_any[0]
+        card_id = card.get("id")
+        local_clip = os.path.join(BASE_DIR, "clips", f"clip_{card_id}.mp4")
+        if os.path.exists(local_clip) and os.path.getsize(local_clip) > 10000:
+            card_copy = dict(card)
+            card_copy["file_path"] = local_clip
+            card_copy["search_word"] = card.get("word") or "scene"
+            return card_copy
 
     return None
 
 # Format telegram post caption: EXACT 1-TO-1 COPY OF «ШАГ 11 НА СЛУХ» (Screenshot 2)
 def format_cinema_post(cid, quote, translation, hashtags, show=None):
+    # Ensure contractions in hashtags are united with _ so Telegram treats each as ONE unbroken hashtag
+    # e.g. #I'm -> #I_m, #what's -> #what_s, #you're -> #you_re, #don't -> #don_t
+    if hashtags:
+        hashtags = hashtags.replace("'", "_")
+        hashtags = re.sub(r'_+', '_', hashtags)
+
     q_esc = html.escape(quote or "", quote=False)
     tr_esc = html.escape(translation or "", quote=False)
     tags_esc = html.escape(hashtags or "", quote=False)
@@ -834,10 +868,35 @@ def read_root():
     return {
         "status": "online",
         "service": "Lingua Magic Cinema Bot 24/7 (Live Dynamic Database)",
-        "version": "2.6.0 (Zero-Spin Desktop Video & Exact Word Search)",
+        "version": "2.7.0 (Unified Hashtags, Compact Menu & Expanded Scene Pool)",
         "verified_scenes": len(VERIFIED_SCENES),
         "uptime": "24/7 online"
     }
+
+# Configure compact menu button ("Практика") to fit cleanly on mobile screens
+def configure_bot_menu(chat_id=None):
+    try:
+        menu_payload = {
+            "menu_button": {
+                "type": "web_app",
+                "text": "Практика",
+                "web_app": {
+                    "url": "https://lingua-cinema-bot.onrender.com"
+                }
+            }
+        }
+        api_call("setChatMenuButton", menu_payload)
+        if chat_id:
+            user_payload = dict(menu_payload)
+            user_payload["chat_id"] = chat_id
+            api_call("setChatMenuButton", user_payload)
+    except Exception as e:
+        print("Menu button error:", e)
+
+@app.get("/set_menu")
+def set_menu(chat_id: str = "8937275197"):
+    configure_bot_menu(chat_id)
+    return {"ok": True, "button_text": "Практика"}
 
 @app.get("/test_card/{card_id}")
 def test_card(card_id: int, chat_id: str = "8937275197"):
@@ -890,6 +949,7 @@ def ensure_faststart_clips():
 
 if __name__ == "__main__":
     ensure_faststart_clips()
+    configure_bot_menu("8937275197")
 
     bot_thread = threading.Thread(target=bot_polling_loop, daemon=True)
     bot_thread.start()
