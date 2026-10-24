@@ -1,0 +1,994 @@
+[
+  {
+    "id": "10001",
+    "word": "agree",
+    "quote": "Agreed. DeLuca, I agree.",
+    "hashtags": "#Agreed. #DeLuca, #I_agree.",
+    "translation": "Согласен. ДеЛюка, я согласен.",
+    "show": "Grey's Anatomy (2005) - S14E04 Ain't That a Kick in the Head",
+    "video_file": "clips/clip_10001_agree.mp4",
+    "video_url": "https://y.getyarn.io/4e8a03eb-b637-4185-968e-45ccb6079670.mp4"
+  },
+  {
+    "id": "10002",
+    "word": "arrive",
+    "quote": "- We have arrived. - Arrived where?",
+    "hashtags": "#- #We_have_arrived. #- #Arrived #where?",
+    "translation": "— Мы прибыли. — Прибыли куда?",
+    "show": "Gilmore Girls",
+    "video_file": "clips/clip_10002_arrive.mp4"
+  },
+  {
+    "id": "10003",
+    "word": "catch",
+    "quote": "I can catch it. I can catch it!",
+    "hashtags": "#I_can #catch #it._I_can #catch #it!",
+    "translation": "Я поймаю это. Я смогу поймать!",
+    "show": "Bluey (2018) - S01E03 Keepy Uppy",
+    "video_file": "clips/clip_10003_catch.mp4",
+    "video_url": "https://y.getyarn.io/24921ac0-38f4-49ce-8f45-9fde905f613e.mp4"
+  },
+  {
+    "id": "10004",
+    "word": "shout",
+    "quote": "[shouts]: I am not shouting!",
+    "hashtags": "#[shouts]: #I_am_not #shouting!",
+    "translation": "[кричит]: Да не кричу я!",
+    "show": "Good Trouble (2019) - S03E06 Help",
+    "video_file": "clips/clip_10004_shout.mp4",
+    "video_url": "https://y.getyarn.io/8bf8fd61-a30b-401b-a792-139c0bc9d1a2.mp4"
+  },
+  {
+    "id": "10005",
+    "word": "smell",
+    "quote": "- You smell what I smell - I smell it.",
+    "hashtags": "#- #You_smell #what #I_smell #- #I_smell #it.",
+    "translation": "— Ты чувствуешь то же, что и я? — Да, я чую.",
+    "show": "Lethal Weapon 2 (1989)",
+    "video_file": "clips/clip_10005_smell.mp4",
+    "video_url": "https://y.getyarn.io/f3ae17cc-9652-4a8b-983b-0929a6dd2643.mp4"
+  },
+  {
+    "id": "10006",
+    "word": "terrible",
+    "quote": "Well, that's terrible. Terrible!",
+    "hashtags": "#Well, #that's #terrible. #Terrible!",
+    "translation": "Я знаю, это ужасно, просто ужасно.",
+    "show": "Antz",
+    "video_file": "clips/clip_10006_terrible.mp4"
+  },
+  {
+    "id": "10007",
+    "word": "worse",
+    "quote": "- Could be worse. - How? How could it be worse?",
+    "hashtags": "#- #Could #be #worse. #- #How? #How #could #it_be #worse?",
+    "translation": "Я это заслужил! Еще хуже! Намного хуже!",
+    "show": "Will & Grace",
+    "video_file": "clips/clip_10007_worse.mp4"
+  },
+  {
+    "id": "10008",
+    "word": "describe",
+    "quote": "I can't describe it.",
+    "hashtags": "#I_can't #describe #it.",
+    "translation": "Я бы описал это так...",
+    "show": "The Space Children",
+    "video_file": "clips/clip_10008_describe.mp4",
+    "video_url": "https://y.getyarn.io/eb76cba1-010d-434f-9e5f-a41d90d8545e.mp4"
+  },
+  {
+    "id": "10009",
+    "word": "instead",
+    "quote": "Why don't you different   instead, instead, instead",
+    "hashtags": "#Why #don't #you_different #instead, #instead, #instead",
+    "translation": "Почему бы вам не поступить иначе, вместо этого...",
+    "show": "The Internship (2013)",
+    "video_file": "clips/clip_10009_instead.mp4",
+    "video_url": "https://y.getyarn.io/5f408a6f-fd5e-46e5-a2d3-a5bb0a90e3e0.mp4"
+  },
+  {
+    "id": "10010",
+    "word": "loud",
+    "quote": "So we scream loud, loud, loud",
+    "hashtags": "#So #we_scream #loud, #loud, #loud",
+    "translation": "И мы кричим громко, громко, громко!",
+    "show": "Maleficent: Mistress of Evil",
+    "video_file": "clips/clip_10010_loud.mp4",
+    "video_url": "https://y.getyarn.io/45f3ed2c-3aa7-410b-9af9-35cc69ab48cd.mp4"
+  },
+  {
+    "id": "10011",
+    "word": "agree",
+    "quote": "Agreed. DeLuca, I agree.",
+    "hashtags": "#Agreed. #DeLuca, #I_agree.",
+    "translation": "Согласен. ДеЛюка, я согласен.",
+    "show": "Grey's Anatomy (2005) - S14E04 Ain't That a Kick in the Head",
+    "video_file": "clips/clip_10011_agree.mp4",
+    "video_url": "https://y.getyarn.io/4e8a03eb-b637-4185-968e-45ccb6079670.mp4"
+  },
+  {
+    "id": "10012",
+    "word": "agree",
+    "quote": "Agreed. DeLuca, I agree.",
+    "hashtags": "#Agreed. #DeLuca, #I_agree.",
+    "translation": "Согласен. ДеЛюка, я согласен.",
+    "show": "Grey's Anatomy (2005) - S14E04 Ain't That a Kick in the Head",
+    "video_file": "clips/clip_10012_agree.mp4",
+    "video_url": "https://y.getyarn.io/4e8a03eb-b637-4185-968e-45ccb6079670.mp4"
+  },
+  {
+    "id": "10013",
+    "word": "arrive",
+    "quote": "-When I arrive-- -When you arrive",
+    "hashtags": "#-When #I_arrive-- #-When #you_arrive",
+    "translation": "— Мы прибыли. — Прибыли куда?",
+    "show": "Star Trek: Picard (2020) - S01E02 Maps and Legends",
+    "video_file": "clips/clip_10013_arrive.mp4",
+    "video_url": "https://y.getyarn.io/99e8bca3-b70e-4921-8968-e6a1fc88fd5c.mp4"
+  },
+  {
+    "id": "10014",
+    "word": "arrive",
+    "quote": "-When I arrive-- -When you arrive",
+    "hashtags": "#-When #I_arrive-- #-When #you_arrive",
+    "translation": "— Мы прибыли. — Прибыли куда?",
+    "show": "Star Trek: Picard (2020) - S01E02 Maps and Legends",
+    "video_file": "clips/clip_10014_arrive.mp4",
+    "video_url": "https://y.getyarn.io/99e8bca3-b70e-4921-8968-e6a1fc88fd5c.mp4"
+  },
+  {
+    "id": "10015",
+    "word": "catch",
+    "quote": "I can catch it. I can catch it!",
+    "hashtags": "#I_can #catch #it._I_can #catch #it!",
+    "translation": "Я поймаю это. Я смогу поймать!",
+    "show": "Bluey (2018) - S01E03 Keepy Uppy",
+    "video_file": "clips/clip_10015_catch.mp4",
+    "video_url": "https://y.getyarn.io/24921ac0-38f4-49ce-8f45-9fde905f613e.mp4"
+  },
+  {
+    "id": "10016",
+    "word": "catch",
+    "quote": "I can catch it. I can catch it!",
+    "hashtags": "#I_can #catch #it._I_can #catch #it!",
+    "translation": "Я поймаю это. Я смогу поймать!",
+    "show": "Bluey (2018) - S01E03 Keepy Uppy",
+    "video_file": "clips/clip_10016_catch.mp4",
+    "video_url": "https://y.getyarn.io/24921ac0-38f4-49ce-8f45-9fde905f613e.mp4"
+  },
+  {
+    "id": "10017",
+    "word": "terrible",
+    "quote": "I know, terrible, terrible thing.",
+    "hashtags": "#I_know, #terrible, #terrible #thing.",
+    "translation": "Я знаю, это ужасно, просто ужасно.",
+    "show": "The IT Crowd (2006) - S01E05 The Haunting Of Bill Crouse",
+    "video_file": "clips/clip_10017_terrible.mp4",
+    "video_url": "https://y.getyarn.io/7eac880b-9771-4781-ba3a-6c8add001f92.mp4"
+  },
+  {
+    "id": "10018",
+    "word": "terrible",
+    "quote": "I know, terrible, terrible thing.",
+    "hashtags": "#I_know, #terrible, #terrible #thing.",
+    "translation": "Я знаю, это ужасно, просто ужасно.",
+    "show": "The IT Crowd (2006) - S01E05 The Haunting Of Bill Crouse",
+    "video_file": "clips/clip_10018_terrible.mp4",
+    "video_url": "https://y.getyarn.io/7eac880b-9771-4781-ba3a-6c8add001f92.mp4"
+  },
+  {
+    "id": "10019",
+    "word": "worse",
+    "quote": "I deserve it! Worse! Worse!",
+    "hashtags": "#I_deserve #it!_Worse! #Worse!",
+    "translation": "Я это заслужил! Еще хуже! Намного хуже!",
+    "show": "Jane the Virgin (2014) - S02E18 Chapter Forty",
+    "video_file": "clips/clip_10019_worse.mp4",
+    "video_url": "https://y.getyarn.io/e0044d6a-50e1-4d24-9fed-cc5bc782cfc8.mp4"
+  },
+  {
+    "id": "10020",
+    "word": "worse",
+    "quote": "I deserve it! Worse! Worse!",
+    "hashtags": "#I_deserve #it!_Worse! #Worse!",
+    "translation": "Я это заслужил! Еще хуже! Намного хуже!",
+    "show": "Jane the Virgin (2014) - S02E18 Chapter Forty",
+    "video_file": "clips/clip_10020_worse.mp4",
+    "video_url": "https://y.getyarn.io/e0044d6a-50e1-4d24-9fed-cc5bc782cfc8.mp4"
+  },
+  {
+    "id": "10021",
+    "word": "describe",
+    "quote": "I would describe it...",
+    "hashtags": "#I_would #describe #it...",
+    "translation": "Я бы описал это так...",
+    "show": "Seinfeld (1989) - S09E23 The Finale (1)",
+    "video_file": "clips/clip_10021_describe.mp4",
+    "video_url": "https://y.getyarn.io/310f8fe4-544f-4c28-95ff-5aae3b5af969.mp4"
+  },
+  {
+    "id": "10022",
+    "word": "describe",
+    "quote": "I can't describe it.",
+    "hashtags": "#I_can't #describe #it.",
+    "translation": "Я бы описал это так...",
+    "show": "The Space Children",
+    "video_file": "clips/clip_10022_describe.mp4",
+    "video_url": "https://y.getyarn.io/eb76cba1-010d-434f-9e5f-a41d90d8545e.mp4"
+  },
+  {
+    "id": "10023",
+    "word": "instead",
+    "quote": "Why don't you different   instead, instead, instead",
+    "hashtags": "#Why #don't #you_different #instead, #instead, #instead",
+    "translation": "Почему бы вам не поступить иначе, вместо этого...",
+    "show": "The Internship (2013)",
+    "video_file": "clips/clip_10023_instead.mp4",
+    "video_url": "https://y.getyarn.io/5f408a6f-fd5e-46e5-a2d3-a5bb0a90e3e0.mp4"
+  },
+  {
+    "id": "10024",
+    "word": "instead",
+    "quote": "Why don't you different   instead, instead, instead",
+    "hashtags": "#Why #don't #you_different #instead, #instead, #instead",
+    "translation": "Почему бы вам не поступить иначе, вместо этого...",
+    "show": "The Internship (2013)",
+    "video_file": "clips/clip_10024_instead.mp4",
+    "video_url": "https://y.getyarn.io/5f408a6f-fd5e-46e5-a2d3-a5bb0a90e3e0.mp4"
+  },
+  {
+    "id": "10025",
+    "word": "loud",
+    "quote": "So we scream loud, loud, loud",
+    "hashtags": "#So #we_scream #loud, #loud, #loud",
+    "translation": "И мы кричим громко, громко, громко!",
+    "show": "Maleficent: Mistress of Evil",
+    "video_file": "clips/clip_10025_loud.mp4",
+    "video_url": "https://y.getyarn.io/45f3ed2c-3aa7-410b-9af9-35cc69ab48cd.mp4"
+  },
+  {
+    "id": "10026",
+    "word": "loud",
+    "quote": "So we scream loud, loud, loud",
+    "hashtags": "#So #we_scream #loud, #loud, #loud",
+    "translation": "И мы кричим громко, громко, громко!",
+    "show": "Maleficent: Mistress of Evil",
+    "video_file": "clips/clip_10026_loud.mp4",
+    "video_url": "https://y.getyarn.io/45f3ed2c-3aa7-410b-9af9-35cc69ab48cd.mp4"
+  },
+  {
+    "id": "10027",
+    "word": "kill",
+    "quote": "I was killing, Jerry. Killing. I killed.",
+    "hashtags": "#I_was_killing, #Jerry. #Killing. #I_killed.",
+    "translation": "Я просто убивал наповал, Джерри. Убивал зал смехом.",
+    "show": "Seinfeld (1989) - S09E01 The Butter Shave",
+    "video_file": "clips/clip_10027_kill.mp4",
+    "video_url": "https://y.getyarn.io/66209be9-98c3-4ad4-be75-f0db5cfc3e7e.mp4"
+  },
+  {
+    "id": "10028",
+    "word": "kill",
+    "quote": "I was killing, Jerry. Killing. I killed.",
+    "hashtags": "#I_was_killing, #Jerry. #Killing. #I_killed.",
+    "translation": "Я просто убивал наповал, Джерри. Убивал зал смехом.",
+    "show": "Seinfeld (1989) - S09E01 The Butter Shave",
+    "video_file": "clips/clip_10028_kill.mp4",
+    "video_url": "https://y.getyarn.io/66209be9-98c3-4ad4-be75-f0db5cfc3e7e.mp4"
+  },
+  {
+    "id": "10029",
+    "word": "kill",
+    "quote": "I was killing, Jerry. Killing. I killed.",
+    "hashtags": "#I_was_killing, #Jerry. #Killing. #I_killed.",
+    "translation": "Я просто убивал наповал, Джерри. Убивал зал смехом.",
+    "show": "Seinfeld (1989) - S09E01 The Butter Shave",
+    "video_file": "clips/clip_10029_kill.mp4",
+    "video_url": "https://y.getyarn.io/66209be9-98c3-4ad4-be75-f0db5cfc3e7e.mp4"
+  },
+  {
+    "id": "10030",
+    "word": "noise",
+    "quote": "I can't, you're... The noises, the noises.",
+    "hashtags": "#I_can't, #you're... #The_noises, #the_noises.",
+    "translation": "Я не могу, эти звуки... Эти шумы, эти шумы.",
+    "show": "Broad City (2014) S04E07 Florida",
+    "video_file": "clips/clip_10030_noise.mp4",
+    "video_url": "https://y.getyarn.io/6ead4dc4-6c34-422d-8a18-0eb563132117.mp4"
+  },
+  {
+    "id": "10031",
+    "word": "noise",
+    "quote": "I can't, you're... The noises, the noises.",
+    "hashtags": "#I_can't, #you're... #The_noises, #the_noises.",
+    "translation": "Я не могу, эти звуки... Эти шумы, эти шумы.",
+    "show": "Broad City (2014) S04E07 Florida",
+    "video_file": "clips/clip_10031_noise.mp4",
+    "video_url": "https://y.getyarn.io/6ead4dc4-6c34-422d-8a18-0eb563132117.mp4"
+  },
+  {
+    "id": "10032",
+    "word": "noise",
+    "quote": "I can't, you're... The noises, the noises.",
+    "hashtags": "#I_can't, #you're... #The_noises, #the_noises.",
+    "translation": "Я не могу, эти звуки... Эти шумы, эти шумы.",
+    "show": "Broad City (2014) S04E07 Florida",
+    "video_file": "clips/clip_10032_noise.mp4",
+    "video_url": "https://y.getyarn.io/6ead4dc4-6c34-422d-8a18-0eb563132117.mp4"
+  },
+  {
+    "id": "10033",
+    "word": "camera",
+    "quote": "- I blind camera three. - Camera four.",
+    "hashtags": "#- #I_blind #camera #three. #- #Camera #four.",
+    "translation": "— Я отключаю третью камеру. — Камера номер четыре.",
+    "show": "Ocean's Twelve (2004) Crime",
+    "video_file": "clips/clip_10033_camera.mp4",
+    "video_url": "https://y.getyarn.io/61e9e4ad-1dc1-48e5-8af9-f5db6a9af488.mp4"
+  },
+  {
+    "id": "10034",
+    "word": "camera",
+    "quote": "- I blind camera three. - Camera four.",
+    "hashtags": "#- #I_blind #camera #three. #- #Camera #four.",
+    "translation": "— Я отключаю третью камеру. — Камера номер четыре.",
+    "show": "Ocean's Twelve (2004) Crime",
+    "video_file": "clips/clip_10034_camera.mp4",
+    "video_url": "https://y.getyarn.io/61e9e4ad-1dc1-48e5-8af9-f5db6a9af488.mp4"
+  },
+  {
+    "id": "10035",
+    "word": "camera",
+    "quote": "- I blind camera three. - Camera four.",
+    "hashtags": "#- #I_blind #camera #three. #- #Camera #four.",
+    "translation": "— Я отключаю третью камеру. — Камера номер четыре.",
+    "show": "Ocean's Twelve (2004) Crime",
+    "video_file": "clips/clip_10035_camera.mp4",
+    "video_url": "https://y.getyarn.io/61e9e4ad-1dc1-48e5-8af9-f5db6a9af488.mp4"
+  },
+  {
+    "id": "10036",
+    "word": "weather",
+    "quote": "- There's weather. - I don't need weather.",
+    "hashtags": "#- #There's #weather. #- #I_don't #need #weather.",
+    "translation": "— Там погода. — Мне не нужна никакая погода.",
+    "show": "Seinfeld (1989) - S04E10 The Virgin",
+    "video_file": "clips/clip_10036_weather.mp4",
+    "video_url": "https://y.getyarn.io/93cca5c3-e8e9-4117-a709-60694b63ef9c.mp4"
+  },
+  {
+    "id": "10037",
+    "word": "weather",
+    "quote": "- There's weather. - I don't need weather.",
+    "hashtags": "#- #There's #weather. #- #I_don't #need #weather.",
+    "translation": "— Там погода. — Мне не нужна никакая погода.",
+    "show": "Seinfeld (1989) - S04E10 The Virgin",
+    "video_file": "clips/clip_10037_weather.mp4",
+    "video_url": "https://y.getyarn.io/93cca5c3-e8e9-4117-a709-60694b63ef9c.mp4"
+  },
+  {
+    "id": "10038",
+    "word": "weather",
+    "quote": "- There's weather. - I don't need weather.",
+    "hashtags": "#- #There's #weather. #- #I_don't #need #weather.",
+    "translation": "— Там погода. — Мне не нужна никакая погода.",
+    "show": "Seinfeld (1989) - S04E10 The Virgin",
+    "video_file": "clips/clip_10038_weather.mp4",
+    "video_url": "https://y.getyarn.io/93cca5c3-e8e9-4117-a709-60694b63ef9c.mp4"
+  },
+  {
+    "id": "10039",
+    "word": "issue",
+    "quote": "Yeah, I got issues (I got issues)",
+    "hashtags": "#Yeah, #I_got #issues #(I_got #issues)",
+    "translation": "Да, у меня есть проблемы (мои личные трудности).",
+    "show": "Julia Michaels - Issues",
+    "video_file": "clips/clip_10039_issue.mp4",
+    "video_url": "https://y.getyarn.io/60ad70c7-d176-4dd8-962c-96996142bf83.mp4"
+  },
+  {
+    "id": "10040",
+    "word": "issue",
+    "quote": "Yeah, I got issues (I got issues)",
+    "hashtags": "#Yeah, #I_got #issues #(I_got #issues)",
+    "translation": "Да, у меня есть проблемы (мои личные трудности).",
+    "show": "Julia Michaels - Issues",
+    "video_file": "clips/clip_10040_issue.mp4",
+    "video_url": "https://y.getyarn.io/60ad70c7-d176-4dd8-962c-96996142bf83.mp4"
+  },
+  {
+    "id": "10041",
+    "word": "issue",
+    "quote": "Yeah, I got issues (I got issues)",
+    "hashtags": "#Yeah, #I_got #issues #(I_got #issues)",
+    "translation": "Да, у меня есть проблемы (мои личные трудности).",
+    "show": "Julia Michaels - Issues",
+    "video_file": "clips/clip_10041_issue.mp4",
+    "video_url": "https://y.getyarn.io/60ad70c7-d176-4dd8-962c-96996142bf83.mp4"
+  },
+  {
+    "id": "10042",
+    "word": "report",
+    "quote": "Reporters love reporting stuff.",
+    "hashtags": "#Reporters #love #reporting #stuff.",
+    "translation": "Репортеры просто обожают делать репортажи.",
+    "show": "Bob's Burgers (2011) - S09E07 I Bob Your Pardon",
+    "video_file": "clips/clip_10042_report.mp4",
+    "video_url": "https://y.getyarn.io/8e50f1b4-9350-4824-9665-e0d23ec3514f.mp4"
+  },
+  {
+    "id": "10043",
+    "word": "report",
+    "quote": "Reporters love reporting stuff.",
+    "hashtags": "#Reporters #love #reporting #stuff.",
+    "translation": "Репортеры просто обожают делать репортажи.",
+    "show": "Bob's Burgers (2011) - S09E07 I Bob Your Pardon",
+    "video_file": "clips/clip_10043_report.mp4",
+    "video_url": "https://y.getyarn.io/8e50f1b4-9350-4824-9665-e0d23ec3514f.mp4"
+  },
+  {
+    "id": "10044",
+    "word": "invite",
+    "quote": "Invaded... inv... Invit... invited",
+    "hashtags": "#Invaded... #inv... #Invit... #invited",
+    "translation": "— Приглашение! Нам пришло приглашение! — Я знаю!",
+    "show": "Game of Thrones (2011) - S03E10 Drama",
+    "video_file": "clips/clip_10044_invite.mp4"
+  },
+  {
+    "id": "10045",
+    "word": "invite",
+    "quote": "-An invite! An invite! -I know!",
+    "hashtags": "#-An_invite! #An_invite! #-I_know!",
+    "translation": "— Приглашение! Нам пришло приглашение! — Я знаю!",
+    "show": "Sex Education (2019) - S01E02 Episode #1.2",
+    "video_file": "clips/clip_10045_invite.mp4",
+    "video_url": "https://y.getyarn.io/a3a7e6b7-e336-4a84-9efe-31d8246f085a.mp4"
+  },
+  {
+    "id": "10046",
+    "word": "invite",
+    "quote": "-An invite! An invite! -I know!",
+    "hashtags": "#-An_invite! #An_invite! #-I_know!",
+    "translation": "— Приглашение! Нам пришло приглашение! — Я знаю!",
+    "show": "Sex Education (2019) - S01E02 Episode #1.2",
+    "video_file": "clips/clip_10046_invite.mp4",
+    "video_url": "https://y.getyarn.io/a3a7e6b7-e336-4a84-9efe-31d8246f085a.mp4"
+  },
+  {
+    "id": "10047",
+    "word": "approach",
+    "quote": "That's an interesting approach,",
+    "hashtags": "#That's #an_interesting #approach,",
+    "translation": "Это весьма любопытный подход к делу.",
+    "show": "Pretty Little Liars (2010) - S03E03 Mystery",
+    "video_file": "clips/clip_10047_approach.mp4",
+    "video_url": "https://y.getyarn.io/7b322fac-4cf1-47c9-b070-6dc561cee659.mp4"
+  },
+  {
+    "id": "10048",
+    "word": "approach",
+    "quote": "That's an interesting approach,",
+    "hashtags": "#That's #an_interesting #approach,",
+    "translation": "Это весьма любопытный подход к делу.",
+    "show": "Pretty Little Liars (2010) - S03E03 Mystery",
+    "video_file": "clips/clip_10048_approach.mp4",
+    "video_url": "https://y.getyarn.io/7b322fac-4cf1-47c9-b070-6dc561cee659.mp4"
+  },
+  {
+    "id": "10049",
+    "word": "approach",
+    "quote": "That's an interesting approach,",
+    "hashtags": "#That's #an_interesting #approach,",
+    "translation": "Это весьма любопытный подход к делу.",
+    "show": "Pretty Little Liars (2010) - S03E03 Mystery",
+    "video_file": "clips/clip_10049_approach.mp4",
+    "video_url": "https://y.getyarn.io/7b322fac-4cf1-47c9-b070-6dc561cee659.mp4"
+  },
+  {
+    "id": "10050",
+    "word": "cloud",
+    "quote": "I am a cloud. I am a cloud.",
+    "hashtags": "#I_am_a #cloud. #I_am_a #cloud.",
+    "translation": "Я парю словно облако. Я облако.",
+    "show": "Frasier (1993) - S10E16 Fraternal Schwinns",
+    "video_file": "clips/clip_10050_cloud.mp4",
+    "video_url": "https://y.getyarn.io/fb5160d9-f04c-43af-a3b0-66e50d67813b.mp4"
+  },
+  {
+    "id": "10051",
+    "word": "cloud",
+    "quote": "I am a cloud. I am a cloud.",
+    "hashtags": "#I_am_a #cloud. #I_am_a #cloud.",
+    "translation": "Я парю словно облако. Я облако.",
+    "show": "Frasier (1993) - S10E16 Fraternal Schwinns",
+    "video_file": "clips/clip_10051_cloud.mp4",
+    "video_url": "https://y.getyarn.io/fb5160d9-f04c-43af-a3b0-66e50d67813b.mp4"
+  },
+  {
+    "id": "10052",
+    "word": "cloud",
+    "quote": "I am a cloud. I am a cloud.",
+    "hashtags": "#I_am_a #cloud. #I_am_a #cloud.",
+    "translation": "Я парю словно облако. Я облако.",
+    "show": "Frasier (1993) - S10E16 Fraternal Schwinns",
+    "video_file": "clips/clip_10052_cloud.mp4",
+    "video_url": "https://y.getyarn.io/fb5160d9-f04c-43af-a3b0-66e50d67813b.mp4"
+  },
+  {
+    "id": "10053",
+    "word": "understand",
+    "quote": "Trying to understand us, trying to understand",
+    "hashtags": "#Trying #to_understand #us, #trying #to_understand",
+    "translation": "Пытаются понять нас, пытаются понять...",
+    "show": "Doctor Who (2005) - S08E08 Mummy on the Orient Express",
+    "video_file": "clips/clip_10053_understand.mp4",
+    "video_url": "https://y.getyarn.io/c77a0ecb-7713-4d81-93dd-f7f471b98cde.mp4"
+  },
+  {
+    "id": "10054",
+    "word": "understand",
+    "quote": "Trying to understand us, trying to understand",
+    "hashtags": "#Trying #to_understand #us, #trying #to_understand",
+    "translation": "Пытаются понять нас, пытаются понять...",
+    "show": "Doctor Who (2005) - S08E08 Mummy on the Orient Express",
+    "video_file": "clips/clip_10054_understand.mp4",
+    "video_url": "https://y.getyarn.io/c77a0ecb-7713-4d81-93dd-f7f471b98cde.mp4"
+  },
+  {
+    "id": "10055",
+    "word": "create",
+    "quote": "I did not create perfection, I created error.",
+    "hashtags": "#I_did #not_create #perfection, #I_created #error.",
+    "translation": "Я создавал не совершенство, я породил ошибку.",
+    "show": "Star Trek (1966) - S02E03 The Changeling",
+    "video_file": "clips/clip_10055_create.mp4",
+    "video_url": "https://y.getyarn.io/2275b030-4835-4009-a7db-bb6334510c6c.mp4"
+  },
+  {
+    "id": "10056",
+    "word": "create",
+    "quote": "I did not create perfection, I created error.",
+    "hashtags": "#I_did #not_create #perfection, #I_created #error.",
+    "translation": "Я создавал не совершенство, я породил ошибку.",
+    "show": "Star Trek (1966) - S02E03 The Changeling",
+    "video_file": "clips/clip_10056_create.mp4",
+    "video_url": "https://y.getyarn.io/2275b030-4835-4009-a7db-bb6334510c6c.mp4"
+  },
+  {
+    "id": "10057",
+    "word": "create",
+    "quote": "I did not create perfection, I created error.",
+    "hashtags": "#I_did #not_create #perfection, #I_created #error.",
+    "translation": "Я создавал не совершенство, я породил ошибку.",
+    "show": "Star Trek (1966) - S02E03 The Changeling",
+    "video_file": "clips/clip_10057_create.mp4",
+    "video_url": "https://y.getyarn.io/2275b030-4835-4009-a7db-bb6334510c6c.mp4"
+  },
+  {
+    "id": "10058",
+    "word": "laugh",
+    "quote": "Laugh, laugh, laugh. And then you say:",
+    "hashtags": "#Laugh, #laugh, #laugh. #And #then #you_say:",
+    "translation": "Смейся, смейся, смейся. А затем скажи:",
+    "show": "The Love Boat (1977) - S01E14 Too Hot to Handle/Family Reunion/Cinderella Story",
+    "video_file": "clips/clip_10058_laugh.mp4",
+    "video_url": "https://y.getyarn.io/350da791-0a3c-4aa4-8d06-f3d608ce4bf9.mp4"
+  },
+  {
+    "id": "10059",
+    "word": "laugh",
+    "quote": "Laugh, laugh, laugh. And then you say:",
+    "hashtags": "#Laugh, #laugh, #laugh. #And #then #you_say:",
+    "translation": "Смейся, смейся, смейся. А затем скажи:",
+    "show": "The Love Boat (1977) - S01E14 Too Hot to Handle/Family Reunion/Cinderella Story",
+    "video_file": "clips/clip_10059_laugh.mp4",
+    "video_url": "https://y.getyarn.io/350da791-0a3c-4aa4-8d06-f3d608ce4bf9.mp4"
+  },
+  {
+    "id": "10060",
+    "word": "laugh",
+    "quote": "Laugh, laugh, laugh. And then you say:",
+    "hashtags": "#Laugh, #laugh, #laugh. #And #then #you_say:",
+    "translation": "Смейся, смейся, смейся. А затем скажи:",
+    "show": "The Love Boat (1977) - S01E14 Too Hot to Handle/Family Reunion/Cinderella Story",
+    "video_file": "clips/clip_10060_laugh.mp4",
+    "video_url": "https://y.getyarn.io/350da791-0a3c-4aa4-8d06-f3d608ce4bf9.mp4"
+  },
+  {
+    "id": "10061",
+    "word": "secret",
+    "quote": "A secret I love secrets.",
+    "hashtags": "#A_secret #I_love #secrets.",
+    "translation": "Секрет? О, я просто обожаю секреты!",
+    "show": "The Great Race",
+    "video_file": "clips/clip_10061_secret.mp4",
+    "video_url": "https://y.getyarn.io/c019d307-50fd-438b-9384-15632765d62f.mp4"
+  },
+  {
+    "id": "10062",
+    "word": "secret",
+    "quote": "A secret I love secrets.",
+    "hashtags": "#A_secret #I_love #secrets.",
+    "translation": "Секрет? О, я просто обожаю секреты!",
+    "show": "The Great Race",
+    "video_file": "clips/clip_10062_secret.mp4",
+    "video_url": "https://y.getyarn.io/c019d307-50fd-438b-9384-15632765d62f.mp4"
+  },
+  {
+    "id": "10063",
+    "word": "secret",
+    "quote": "A secret I love secrets.",
+    "hashtags": "#A_secret #I_love #secrets.",
+    "translation": "Секрет? О, я просто обожаю секреты!",
+    "show": "The Great Race",
+    "video_file": "clips/clip_10063_secret.mp4",
+    "video_url": "https://y.getyarn.io/c019d307-50fd-438b-9384-15632765d62f.mp4"
+  },
+  {
+    "id": "10064",
+    "word": "scare",
+    "quote": "I scared myself scaring you scaring me.",
+    "hashtags": "#I_scared #myself #scaring #you_scaring #me.",
+    "translation": "Я сам испугался, когда пугал тебя, пока ты пугал меня.",
+    "show": "Cars (2006)",
+    "video_file": "clips/clip_10064_scare.mp4",
+    "video_url": "https://y.getyarn.io/885ecdfa-177c-4d82-a8bd-9f2bba107adc.mp4"
+  },
+  {
+    "id": "10065",
+    "word": "scare",
+    "quote": "I'm scared. I'm scared. I'm scared. I'm scare",
+    "hashtags": "#I'm #scared. #I'm #scared. #I'm #scared. #I'm #scare",
+    "translation": "Я сам испугался, когда пугал тебя, пока ты пугал меня.",
+    "show": "Family Guy (1999) - S07E05 Comedy",
+    "video_file": "clips/clip_10065_scare.mp4"
+  },
+  {
+    "id": "10066",
+    "word": "scare",
+    "quote": "They're scared. They're scared? I'm scared",
+    "hashtags": "#They're #scared. #They're #scared? #I'm #scared",
+    "translation": "Я сам испугался, когда пугал тебя, пока ты пугал меня.",
+    "show": "Doctor Who (2005) - S07E08 The Rings of Akhaten",
+    "video_file": "clips/clip_10066_scare.mp4"
+  },
+  {
+    "id": "10067",
+    "word": "promise",
+    "quote": "- You promise - I promise. I promise, no tricks.",
+    "hashtags": "#- #You_promise #- #I_promise. #I_promise, #no #tricks.",
+    "translation": "— Обещаешь? — Обещаю. Обещаю, никаких фокусов.",
+    "show": "Who's That Girl",
+    "video_file": "clips/clip_10067_promise.mp4",
+    "video_url": "https://y.getyarn.io/bc26d802-e284-4882-8440-7331c0bf82ce.mp4"
+  },
+  {
+    "id": "10068",
+    "word": "promise",
+    "quote": "- You promise - I promise. I promise, no tricks.",
+    "hashtags": "#- #You_promise #- #I_promise. #I_promise, #no #tricks.",
+    "translation": "— Обещаешь? — Обещаю. Обещаю, никаких фокусов.",
+    "show": "Who's That Girl",
+    "video_file": "clips/clip_10068_promise.mp4",
+    "video_url": "https://y.getyarn.io/bc26d802-e284-4882-8440-7331c0bf82ce.mp4"
+  },
+  {
+    "id": "10069",
+    "word": "promise",
+    "quote": "- You promise - I promise. I promise, no tricks.",
+    "hashtags": "#- #You_promise #- #I_promise. #I_promise, #no #tricks.",
+    "translation": "— Обещаешь? — Обещаю. Обещаю, никаких фокусов.",
+    "show": "Who's That Girl",
+    "video_file": "clips/clip_10069_promise.mp4",
+    "video_url": "https://y.getyarn.io/bc26d802-e284-4882-8440-7331c0bf82ce.mp4"
+  },
+  {
+    "id": "10070",
+    "word": "afraid",
+    "quote": "- Be afraid. - I am afraid.",
+    "hashtags": "#- #Be #afraid. #- #I_am_afraid.",
+    "translation": "— Бойся. — Да я и так боюсь.",
+    "show": "Without a Paddle (2004)",
+    "video_file": "clips/clip_10070_afraid.mp4",
+    "video_url": "https://y.getyarn.io/dd682fa9-14eb-4ec0-8f64-473ee12654c6.mp4"
+  },
+  {
+    "id": "10071",
+    "word": "afraid",
+    "quote": "- Be afraid. - I am afraid.",
+    "hashtags": "#- #Be #afraid. #- #I_am_afraid.",
+    "translation": "— Бойся. — Да я и так боюсь.",
+    "show": "Without a Paddle (2004)",
+    "video_file": "clips/clip_10071_afraid.mp4",
+    "video_url": "https://y.getyarn.io/dd682fa9-14eb-4ec0-8f64-473ee12654c6.mp4"
+  },
+  {
+    "id": "10072",
+    "word": "afraid",
+    "quote": "- Be afraid. - I am afraid.",
+    "hashtags": "#- #Be #afraid. #- #I_am_afraid.",
+    "translation": "— Бойся. — Да я и так боюсь.",
+    "show": "Without a Paddle (2004)",
+    "video_file": "clips/clip_10072_afraid.mp4",
+    "video_url": "https://y.getyarn.io/dd682fa9-14eb-4ec0-8f64-473ee12654c6.mp4"
+  },
+  {
+    "id": "10073",
+    "word": "clever",
+    "quote": "Very clever. Very clever, Your Majesty.",
+    "hashtags": "#Very #clever. #Very #clever, #Your #Majesty.",
+    "translation": "Очень умно. Очень хитро придумано, Ваше Величество.",
+    "show": "The King and I (1956)",
+    "video_file": "clips/clip_10073_clever.mp4",
+    "video_url": "https://y.getyarn.io/86cd59d2-24ca-4152-b54f-f035e9f16307.mp4"
+  },
+  {
+    "id": "10074",
+    "word": "clever",
+    "quote": "Very clever. Very clever, Your Majesty.",
+    "hashtags": "#Very #clever. #Very #clever, #Your #Majesty.",
+    "translation": "Очень умно. Очень хитро придумано, Ваше Величество.",
+    "show": "The King and I (1956)",
+    "video_file": "clips/clip_10074_clever.mp4",
+    "video_url": "https://y.getyarn.io/86cd59d2-24ca-4152-b54f-f035e9f16307.mp4"
+  },
+  {
+    "id": "10075",
+    "word": "cruel",
+    "quote": "I was cruel, and I'm never cruel.",
+    "hashtags": "#I_was_cruel, #and #I'm #never #cruel.",
+    "translation": "Я поступил жестоко, хотя я никогда не бываю жестоким.",
+    "show": "You've Got Mail (1998)",
+    "video_file": "clips/clip_10075_cruel.mp4",
+    "video_url": "https://y.getyarn.io/e827bd2a-0f7e-4d29-bf53-e2713ebe1d6f.mp4"
+  },
+  {
+    "id": "10076",
+    "word": "cruel",
+    "quote": "I was cruel, and I'm never cruel.",
+    "hashtags": "#I_was_cruel, #and #I'm #never #cruel.",
+    "translation": "Я поступил жестоко, хотя я никогда не бываю жестоким.",
+    "show": "You've Got Mail (1998)",
+    "video_file": "clips/clip_10076_cruel.mp4",
+    "video_url": "https://y.getyarn.io/e827bd2a-0f7e-4d29-bf53-e2713ebe1d6f.mp4"
+  },
+  {
+    "id": "10077",
+    "word": "cruel",
+    "quote": "I was cruel, and I'm never cruel.",
+    "hashtags": "#I_was_cruel, #and #I'm #never #cruel.",
+    "translation": "Я поступил жестоко, хотя я никогда не бываю жестоким.",
+    "show": "You've Got Mail (1998)",
+    "video_file": "clips/clip_10077_cruel.mp4",
+    "video_url": "https://y.getyarn.io/e827bd2a-0f7e-4d29-bf53-e2713ebe1d6f.mp4"
+  },
+  {
+    "id": "10078",
+    "word": "moment",
+    "quote": "And in the moment, this moment, I...",
+    "hashtags": "#And #in_the_moment, #this #moment, #I...",
+    "translation": "И в этот момент, именно в этот самый миг, я...",
+    "show": "Shopgirl (2005)",
+    "video_file": "clips/clip_10078_moment.mp4",
+    "video_url": "https://y.getyarn.io/25f0e397-1c00-4194-a267-e9b7d944e291.mp4"
+  },
+  {
+    "id": "10079",
+    "word": "moment",
+    "quote": "And in the moment, this moment, I...",
+    "hashtags": "#And #in_the_moment, #this #moment, #I...",
+    "translation": "И в этот момент, именно в этот самый миг, я...",
+    "show": "Shopgirl (2005)",
+    "video_file": "clips/clip_10079_moment.mp4",
+    "video_url": "https://y.getyarn.io/25f0e397-1c00-4194-a267-e9b7d944e291.mp4"
+  },
+  {
+    "id": "10080",
+    "word": "moment",
+    "quote": "And in the moment, this moment, I...",
+    "hashtags": "#And #in_the_moment, #this #moment, #I...",
+    "translation": "И в этот момент, именно в этот самый миг, я...",
+    "show": "Shopgirl (2005)",
+    "video_file": "clips/clip_10080_moment.mp4",
+    "video_url": "https://y.getyarn.io/25f0e397-1c00-4194-a267-e9b7d944e291.mp4"
+  },
+  {
+    "id": "10081",
+    "word": "adventure",
+    "quote": "I crave adventure, boys.",
+    "hashtags": "#I_crave #adventure, #boys.",
+    "translation": "Я жажду настоящих приключений, парни!",
+    "show": "Far and Away (1992)",
+    "video_file": "clips/clip_10081_adventure.mp4",
+    "video_url": "https://y.getyarn.io/cb3add8c-2821-4b40-a8b9-f5b0c5ee3352.mp4"
+  },
+  {
+    "id": "10082",
+    "word": "adventure",
+    "quote": "I crave adventure, boys.",
+    "hashtags": "#I_crave #adventure, #boys.",
+    "translation": "Я жажду настоящих приключений, парни!",
+    "show": "Far and Away (1992)",
+    "video_file": "clips/clip_10082_adventure.mp4",
+    "video_url": "https://y.getyarn.io/cb3add8c-2821-4b40-a8b9-f5b0c5ee3352.mp4"
+  },
+  {
+    "id": "10083",
+    "word": "adventure",
+    "quote": "I crave adventure, boys.",
+    "hashtags": "#I_crave #adventure, #boys.",
+    "translation": "Я жажду настоящих приключений, парни!",
+    "show": "Far and Away (1992)",
+    "video_file": "clips/clip_10083_adventure.mp4",
+    "video_url": "https://y.getyarn.io/cb3add8c-2821-4b40-a8b9-f5b0c5ee3352.mp4"
+  },
+  {
+    "id": "10084",
+    "word": "safe",
+    "quote": "I like safe. I like you safe.",
+    "hashtags": "#I_like #safe. #I_like #you_safe.",
+    "translation": "Мне нравится безопасность. Мне важно, чтобы ты была в безопасности.",
+    "show": "The Accountant (2016)",
+    "video_file": "clips/clip_10084_safe.mp4",
+    "video_url": "https://y.getyarn.io/f72d5216-0145-47fc-b7e4-13d8e2feeb9d.mp4"
+  },
+  {
+    "id": "10085",
+    "word": "safe",
+    "quote": "I like safe. I like you safe.",
+    "hashtags": "#I_like #safe. #I_like #you_safe.",
+    "translation": "Мне нравится безопасность. Мне важно, чтобы ты была в безопасности.",
+    "show": "The Accountant (2016)",
+    "video_file": "clips/clip_10085_safe.mp4",
+    "video_url": "https://y.getyarn.io/f72d5216-0145-47fc-b7e4-13d8e2feeb9d.mp4"
+  },
+  {
+    "id": "10086",
+    "word": "safe",
+    "quote": "I like safe. I like you safe.",
+    "hashtags": "#I_like #safe. #I_like #you_safe.",
+    "translation": "Мне нравится безопасность. Мне важно, чтобы ты была в безопасности.",
+    "show": "The Accountant (2016)",
+    "video_file": "clips/clip_10086_safe.mp4",
+    "video_url": "https://y.getyarn.io/f72d5216-0145-47fc-b7e4-13d8e2feeb9d.mp4"
+  },
+  {
+    "id": "10087",
+    "word": "stroll",
+    "quote": "As I was strolling... Strolling...",
+    "hashtags": "#As #I_was_strolling... #Strolling...",
+    "translation": "Пока я не спеша прогуливался... Прогуливался...",
+    "show": "Monsieur Lazhar (2011)",
+    "video_file": "clips/clip_10087_stroll.mp4",
+    "video_url": "https://y.getyarn.io/5ed3dd72-4010-4ea9-a51d-ca73e521b09d.mp4"
+  },
+  {
+    "id": "10088",
+    "word": "stroll",
+    "quote": "As I was strolling... Strolling...",
+    "hashtags": "#As #I_was_strolling... #Strolling...",
+    "translation": "Пока я не спеша прогуливался... Прогуливался...",
+    "show": "Monsieur Lazhar (2011)",
+    "video_file": "clips/clip_10088_stroll.mp4",
+    "video_url": "https://y.getyarn.io/5ed3dd72-4010-4ea9-a51d-ca73e521b09d.mp4"
+  },
+  {
+    "id": "10089",
+    "word": "stroll",
+    "quote": "As I was strolling... Strolling",
+    "hashtags": "#As #I_was_strolling... #Strolling",
+    "translation": "Пока я не спеша прогуливался... Прогуливался...",
+    "show": "Monsieur Lazhar (2011)",
+    "video_file": "clips/clip_10089_stroll.mp4"
+  },
+  {
+    "id": "10090",
+    "word": "increase",
+    "quote": "increases heat, increases steam,",
+    "hashtags": "#increases #heat, #increases #steam,",
+    "translation": "И тогда я увеличил это число.",
+    "show": "Chernobyl (2019) - S01E05 Vichnaya Pamyat",
+    "video_file": "clips/clip_10090_increase.mp4"
+  },
+  {
+    "id": "10091",
+    "word": "increase",
+    "quote": "So I increased it.",
+    "hashtags": "#So #I_increased #it.",
+    "translation": "И тогда я увеличил это число.",
+    "show": "Erin Brockovich (2000)",
+    "video_file": "clips/clip_10091_increase.mp4",
+    "video_url": "https://y.getyarn.io/a8ecc6e0-c907-47e9-9f09-b5c73507eca0.mp4"
+  },
+  {
+    "id": "10092",
+    "word": "increase",
+    "quote": "So I increased it.",
+    "hashtags": "#So #I_increased #it.",
+    "translation": "И тогда я увеличил это число.",
+    "show": "Erin Brockovich (2000)",
+    "video_file": "clips/clip_10092_increase.mp4",
+    "video_url": "https://y.getyarn.io/a8ecc6e0-c907-47e9-9f09-b5c73507eca0.mp4"
+  },
+  {
+    "id": "10093",
+    "word": "weight",
+    "quote": "That's all I used to think about was weight, weight, weight.",
+    "hashtags": "#That's #all #I_used #to_think #about #was_weight, #weight, #weight.",
+    "translation": "Все, о чем я только мог думать — это вес, вес, вес.",
+    "show": "Raging Bull (1980)",
+    "video_file": "clips/clip_10093_weight.mp4",
+    "video_url": "https://y.getyarn.io/3169f64c-20a7-4caa-8cd2-f429993da320.mp4"
+  },
+  {
+    "id": "10094",
+    "word": "weight",
+    "quote": "That's all I used to think about was weight, weight, weight.",
+    "hashtags": "#That's #all #I_used #to_think #about #was_weight, #weight, #weight.",
+    "translation": "Все, о чем я только мог думать — это вес, вес, вес.",
+    "show": "Raging Bull (1980)",
+    "video_file": "clips/clip_10094_weight.mp4",
+    "video_url": "https://y.getyarn.io/3169f64c-20a7-4caa-8cd2-f429993da320.mp4"
+  },
+  {
+    "id": "10095",
+    "word": "weight",
+    "quote": "That's all I used to think about was weight, weight, weight.",
+    "hashtags": "#That's #all #I_used #to_think #about #was_weight, #weight, #weight.",
+    "translation": "Все, о чем я только мог думать — это вес, вес, вес.",
+    "show": "Raging Bull (1980)",
+    "video_file": "clips/clip_10095_weight.mp4",
+    "video_url": "https://y.getyarn.io/3169f64c-20a7-4caa-8cd2-f429993da320.mp4"
+  },
+  {
+    "id": "10096",
+    "word": "alcohol",
+    "quote": "- Alcohol I don't drink alcohol. - Fine, faint.",
+    "hashtags": "#- #Alcohol #I_don't #drink #alcohol. #- #Fine, #faint.",
+    "translation": "— Алкоголь? Я не пью алкоголь. — Ладно, падай в обморок.",
+    "show": "The Big Bang Theory (2007) - S03E18 The Pants Alternative",
+    "video_file": "clips/clip_10096_alcohol.mp4",
+    "video_url": "https://y.getyarn.io/726b5bba-fbc6-424b-896e-7b04bb390fb8.mp4"
+  },
+  {
+    "id": "10097",
+    "word": "alcohol",
+    "quote": "- Alcohol I don't drink alcohol. - Fine, faint.",
+    "hashtags": "#- #Alcohol #I_don't #drink #alcohol. #- #Fine, #faint.",
+    "translation": "— Алкоголь? Я не пью алкоголь. — Ладно, падай в обморок.",
+    "show": "The Big Bang Theory (2007) - S03E18 The Pants Alternative",
+    "video_file": "clips/clip_10097_alcohol.mp4",
+    "video_url": "https://y.getyarn.io/726b5bba-fbc6-424b-896e-7b04bb390fb8.mp4"
+  },
+  {
+    "id": "10098",
+    "word": "alcohol",
+    "quote": "- Alcohol I don't drink alcohol. - Fine, faint.",
+    "hashtags": "#- #Alcohol #I_don't #drink #alcohol. #- #Fine, #faint.",
+    "translation": "— Алкоголь? Я не пью алкоголь. — Ладно, падай в обморок.",
+    "show": "The Big Bang Theory (2007) - S03E18 The Pants Alternative",
+    "video_file": "clips/clip_10098_alcohol.mp4",
+    "video_url": "https://y.getyarn.io/726b5bba-fbc6-424b-896e-7b04bb390fb8.mp4"
+  },
+  {
+    "id": "10099",
+    "word": "library",
+    "quote": "- The library - Yeah, I think better in libraries.",
+    "hashtags": "#- #The_library #- #Yeah, #I_think #better #in_libraries.",
+    "translation": "— Библиотека? — Да, в библиотеках мне думается куда лучше.",
+    "show": "The Night Agent (2023) - S01E05 The Marionette",
+    "video_file": "clips/clip_10099_library.mp4",
+    "video_url": "https://y.getyarn.io/f3f85197-a1f0-48b9-9b7f-53cc632d5aa4.mp4"
+  },
+  {
+    "id": "10100",
+    "word": "library",
+    "quote": "- The library - Yeah, I think better in libraries.",
+    "hashtags": "#- #The_library #- #Yeah, #I_think #better #in_libraries.",
+    "translation": "— Библиотека? — Да, в библиотеках мне думается куда лучше.",
+    "show": "The Night Agent (2023) - S01E05 The Marionette",
+    "video_file": "clips/clip_10100_library.mp4",
+    "video_url": "https://y.getyarn.io/f3f85197-a1f0-48b9-9b7f-53cc632d5aa4.mp4"
+  }
+]
