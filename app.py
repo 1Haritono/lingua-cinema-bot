@@ -371,6 +371,72 @@ VERIFIED_SCENES = [
         "translation": "О чем ты говоришь?",
         "hashtags": "#What_are_you #talking #about?",
         "word": "about"
+    },
+    {
+        "id": 223720,
+        "cid": "5d094b34-7c8a-4ae0-803c-0b388f8a91e3",
+        "video_url": "https://y.getyarn.io/5d094b34-7c8a-4ae0-803c-0b388f8a91e3.mp4",
+        "duration": 4.0,
+        "quote": "But I worry. I just worry.",
+        "title": "Ozark (2017) - S03E09 Fire Pink",
+        "translation": "Но я волнуюсь. Я просто волнуюсь.",
+        "hashtags": "#But_I #worry. #I_just #worry.",
+        "word": "worry"
+    },
+    {
+        "id": 223721,
+        "cid": "a1128440-5631-45f1-ba44-55d864b2cd38",
+        "video_url": "https://y.getyarn.io/a1128440-5631-45f1-ba44-55d864b2cd38.mp4",
+        "duration": 4.0,
+        "quote": "Worry about yourself. Don't worry about me.",
+        "title": "Grand Hotel",
+        "translation": "Беспокойся о себе. Не беспокойся обо мне.",
+        "hashtags": "#Worry #about #yourself. #Don_t #worry #about #me.",
+        "word": "worry"
+    },
+    {
+        "id": 223722,
+        "cid": "ddad30b7-384d-4331-b712-0961de5327c5",
+        "video_url": "https://y.getyarn.io/ddad30b7-384d-4331-b712-0961de5327c5.mp4",
+        "duration": 2.5,
+        "quote": "Not to worry, Jordan. Not to worry.",
+        "title": "The Wolf of Wall Street (2013)",
+        "translation": "Не волнуйся, Джордан. Не волнуйся.",
+        "hashtags": "#Not #to_worry, #Jordan. #Not #to_worry.",
+        "word": "worry"
+    },
+    {
+        "id": 223723,
+        "cid": "f1c6f9e0-9e43-40af-b91e-c78c401c6f20",
+        "video_url": "https://y.getyarn.io/f1c6f9e0-9e43-40af-b91e-c78c401c6f20.mp4",
+        "duration": 3.0,
+        "quote": "Worry? Why would I worry?",
+        "title": "Hustle",
+        "translation": "Беспокоиться? С чего бы мне беспокоиться?",
+        "hashtags": "#Worry? #Why_would #I_worry?",
+        "word": "worry"
+    },
+    {
+        "id": 223724,
+        "cid": "64527902-17c5-4320-a124-64a5d17b4291",
+        "video_url": "https://y.getyarn.io/64527902-17c5-4320-a124-64a5d17b4291.mp4",
+        "duration": 4.0,
+        "quote": "Don't worry about me. Worry about yourself.",
+        "title": "Marathon Man (1976)",
+        "translation": "Не беспокойся обо мне. Беспокойся о себе.",
+        "hashtags": "#Don_t #worry #about #me. #Worry #about #yourself.",
+        "word": "worry"
+    },
+    {
+        "id": 223725,
+        "cid": "5ff6a0c1-867f-49e0-9bc0-69dc1bf22a5b",
+        "video_url": "https://y.getyarn.io/5ff6a0c1-867f-49e0-9bc0-69dc1bf22a5b.mp4",
+        "duration": 3.0,
+        "quote": "Not to worry. Not to worry.",
+        "title": "Requiem for a Dream (2000)",
+        "translation": "Не стоит беспокоиться. Не стоит беспокоиться.",
+        "hashtags": "#Not #to_worry. #Not #to_worry.",
+        "word": "worry"
     }
 ]
 
@@ -385,7 +451,8 @@ if os.path.exists(scenes_file):
         print(f"Error loading verified_scenes.json: {e}")
 
 # User seen history to guarantee no repetitive cards
-USER_SEEN_HISTORY = {} # {chat_id: [cid1, cid2, ...]}
+USER_SEEN_HISTORY = {} # {chat_id: [cid1, cid2, ...]} (LRU order: oldest seen first, newest seen last)
+USER_LAST_CARD = {}    # {chat_id: last_card_id}
 
 def get_seen_cards(chat_id):
     return USER_SEEN_HISTORY.setdefault(str(chat_id), [])
@@ -393,13 +460,54 @@ def get_seen_cards(chat_id):
 def record_seen_card(chat_id, card_id):
     if not chat_id:
         return
-    hist = get_seen_cards(chat_id)
     cid_str = str(card_id)
-    if cid_str not in hist:
-        hist.append(cid_str)
-    # When user saw almost all verified scenes, keep only the last 3 so they cycle fresh
-    if len(hist) >= len(VERIFIED_SCENES) - 1:
-        USER_SEEN_HISTORY[str(chat_id)] = hist[-3:]
+    chat_str = str(chat_id)
+    hist = get_seen_cards(chat_id)
+    if cid_str in hist:
+        hist.remove(cid_str)
+    hist.append(cid_str)
+    USER_LAST_CARD[chat_str] = cid_str
+    if len(hist) > 50:
+        USER_SEEN_HISTORY[chat_str] = hist[-40:]
+
+def choose_best_match(matches, chat_id=None, exclude_id=None):
+    """
+    Guarantees:
+    1. NEVER returns the same card twice in a row (excludes current/last shown card).
+    2. Prioritizes fresh unseen cards.
+    3. When all matching cards have been seen, cycles round-robin via LRU order (least recently seen first).
+    """
+    if not matches:
+        return None
+    chat_str = str(chat_id) if chat_id else None
+    last_id = USER_LAST_CARD.get(chat_str) if chat_str else None
+
+    excluded = set()
+    if exclude_id:
+        excluded.add(str(exclude_id))
+    if last_id:
+        excluded.add(str(last_id))
+
+    hist = get_seen_cards(chat_id) if chat_id else []
+    seen_set = set(hist)
+
+    # 1. Filter out excluded cards if other options exist
+    candidates = [m for m in matches if str(m.get("id")) not in excluded]
+    if not candidates:
+        candidates = matches
+
+    # 2. Priority: Unseen cards among candidates
+    unseen = [m for m in candidates if str(m.get("id")) not in seen_set]
+    if unseen:
+        return unseen[0]
+
+    # 3. LRU fallback: card that was seen longest ago comes first
+    def lru_key(m):
+        mid = str(m.get("id"))
+        return hist.index(mid) if mid in hist else -1
+
+    sorted_candidates = sorted(candidates, key=lru_key)
+    return sorted_candidates[0]
 
 # Find matching scenes by word, phrase, or hashtag with relevance scoring
 def find_matching_scenes(query):
@@ -427,7 +535,7 @@ def find_matching_scenes(query):
             if sw == s_word or sw.replace("'", "") == s_word.replace("'", ""):
                 score += 100
 
-        # 2. Hashtag exact match (e.g. #the_truth, #I_need)
+        # 2. Hashtag exact match (e.g. #the_truth, #I_need, #worry)
         if f"#{clean_tag}" in s_tags or f"#{clean_tag.replace(' ', '_')}" in s_tags:
             score += 90
 
@@ -467,14 +575,8 @@ def fetch_live_cinema_scene(query, exclude_id=None, chat_id=None):
     if not matches:
         return None
 
-    seen_ids = set(get_seen_cards(chat_id)) if chat_id else set()
-    if exclude_id:
-        seen_ids.add(str(exclude_id))
-
-    # Priority 1: Scene with this word that user has NOT seen yet
-    fresh_matches = [m for m in matches if str(m.get("id")) not in seen_ids]
-    if fresh_matches:
-        card = fresh_matches[0]
+    card = choose_best_match(matches, chat_id=chat_id, exclude_id=exclude_id)
+    if card:
         card_id = card.get("id")
         local_clip = os.path.join(BASE_DIR, "clips", f"clip_{card_id}.mp4")
         if os.path.exists(local_clip) and os.path.getsize(local_clip) > 10000:
@@ -483,40 +585,13 @@ def fetch_live_cinema_scene(query, exclude_id=None, chat_id=None):
             card_copy["search_word"] = target_word
             return card_copy
 
-    # Priority 2: Other scene with this word excluding only current
-    other_matches = [m for m in matches if str(m.get("id")) != str(exclude_id)]
-    if other_matches:
-        card = other_matches[0]
-        card_id = card.get("id")
-        local_clip = os.path.join(BASE_DIR, "clips", f"clip_{card_id}.mp4")
-        if os.path.exists(local_clip) and os.path.getsize(local_clip) > 10000:
-            card_copy = dict(card)
-            card_copy["file_path"] = local_clip
+    for m in matches:
+        mid = m.get("id")
+        lclip = os.path.join(BASE_DIR, "clips", f"clip_{mid}.mp4")
+        if os.path.exists(lclip) and os.path.getsize(lclip) > 10000:
+            card_copy = dict(m)
+            card_copy["file_path"] = lclip
             card_copy["search_word"] = target_word
-            return card_copy
-
-    # Priority 3: If all scenes for this specific word are seen, pick an unseen fresh scene from the collection
-    unseen_fresh = [s for s in VERIFIED_SCENES if str(s.get("id")) not in seen_ids and str(s.get("id")) != str(exclude_id)]
-    if unseen_fresh:
-        card = unseen_fresh[0]
-        card_id = card.get("id")
-        local_clip = os.path.join(BASE_DIR, "clips", f"clip_{card_id}.mp4")
-        if os.path.exists(local_clip) and os.path.getsize(local_clip) > 10000:
-            card_copy = dict(card)
-            card_copy["file_path"] = local_clip
-            card_copy["search_word"] = card.get("word") or "scene"
-            return card_copy
-
-    # If all collection is seen, pick another scene excluding current
-    other_any = [s for s in VERIFIED_SCENES if str(s.get("id")) != str(exclude_id)]
-    if other_any:
-        card = other_any[0]
-        card_id = card.get("id")
-        local_clip = os.path.join(BASE_DIR, "clips", f"clip_{card_id}.mp4")
-        if os.path.exists(local_clip) and os.path.getsize(local_clip) > 10000:
-            card_copy = dict(card)
-            card_copy["file_path"] = local_clip
-            card_copy["search_word"] = card.get("word") or "scene"
             return card_copy
 
     return None
@@ -619,38 +694,26 @@ def send_cinema_card(chat_id, card_data, video_path_or_url, search_word=None):
 # Send random verified live scene - NEVER FAILS, delivers in < 1 second!
 def send_random_cinema_card(chat_id):
     if VERIFIED_SCENES:
-        seen_ids = set(get_seen_cards(chat_id))
-        fresh_scenes = [s for s in VERIFIED_SCENES if str(s.get("id")) not in seen_ids]
-        if not fresh_scenes:
-            fresh_scenes = VERIFIED_SCENES
+        last_id = USER_LAST_CARD.get(str(chat_id))
+        hist = get_seen_cards(chat_id)
+        seen_set = set(hist)
 
-        for attempt in range(len(fresh_scenes)):
-            card = random.choice(fresh_scenes)
+        # Candidates excluding the last card
+        candidates = [s for s in VERIFIED_SCENES if str(s.get("id")) != str(last_id)]
+        if not candidates:
+            candidates = VERIFIED_SCENES
+
+        unseen = [s for s in candidates if str(s.get("id")) not in seen_set]
+        fresh_pool = unseen if unseen else candidates
+
+        for attempt in range(len(fresh_pool)):
+            card = random.choice(fresh_pool)
             card_id = card.get("id")
-
-            # Check local packaged clip first (100% immune to Cloudflare 403 blocks)
             local_clip = os.path.join(BASE_DIR, "clips", f"clip_{card_id}.mp4")
             if os.path.exists(local_clip) and os.path.getsize(local_clip) > 10000:
                 res = send_cinema_card(chat_id, card, local_clip)
                 if res and res.get("ok"):
                     return
-
-            # Fallback to downloading if local clip is not available
-            clip_url = card.get("video_url")
-            temp_dest = os.path.join(TMP_DIR, f"{card.get('cid', card_id)}.mp4")
-            try:
-                r = requests.get(clip_url, headers=BROWSER_HEADERS, timeout=8)
-                if r.status_code == 200 and len(r.content) > 10000:
-                    with open(temp_dest, "wb") as f:
-                        f.write(r.content)
-                    res = send_cinema_card(chat_id, card, temp_dest)
-                    if res and res.get("ok"):
-                        return
-            except Exception as e:
-                print(f"Error sending verified card: {e}")
-                if os.path.exists(temp_dest):
-                    try: os.remove(temp_dest)
-                    except Exception: pass
 
     # 2. Live fallback if pool failed
     for _ in range(2):
@@ -750,7 +813,8 @@ def bot_polling_loop():
                             w = parts[1] if len(parts) > 1 else "scene"
                             curr_cid = parts[2] if len(parts) > 2 else None
                             api_call("answerCallbackQuery", {"callback_query_id": cq["id"], "text": f"🎬 Сцена со словом '{w}'..."})
-                            scene = fetch_live_cinema_scene(w, exclude_id=curr_cid, chat_id=chat_id)
+                            last_card = curr_cid or USER_LAST_CARD.get(str(chat_id))
+                            scene = fetch_live_cinema_scene(w, exclude_id=last_card, chat_id=chat_id)
                             if scene:
                                 send_cinema_card(chat_id, scene, scene["file_path"], search_word=scene.get("search_word", w))
                             else:
@@ -863,14 +927,11 @@ def bot_polling_loop():
                             api_call("sendMessage", {"chat_id": chat_id, "text": help_text, "parse_mode": "HTML"})
                             continue
 
-                        # Search by word, phrase, or hashtag (e.g. "the_truth", "#the_truth", "I_need", "think", "don't")
-                        matches, target_word = find_matching_scenes(text)
-                        if matches:
-                            seen_ids = set(get_seen_cards(chat_id))
-                            unseen = [m for m in matches if str(m.get("id")) not in seen_ids]
-                            chosen = unseen[0] if unseen else matches[0]
-                            local_clip = os.path.join(BASE_DIR, "clips", f"clip_{chosen['id']}.mp4")
-                            send_cinema_card(chat_id, chosen, local_clip, search_word=target_word)
+                        # Search by word, phrase, or hashtag (e.g. "worry", "the_truth", "#the_truth", "I_need", "think", "don't")
+                        last_card = USER_LAST_CARD.get(str(chat_id))
+                        scene = fetch_live_cinema_scene(text, exclude_id=last_card, chat_id=chat_id)
+                        if scene:
+                            send_cinema_card(chat_id, scene, scene["file_path"], search_word=scene.get("search_word", text.strip()))
                             continue
                         else:
                             clean_t = re.sub(r'[^a-zA-Z0-9_\' ]', '', text).strip()
@@ -912,7 +973,7 @@ def read_root():
     return {
         "status": "online",
         "service": "Lingua Magic Cinema Bot 24/7 (Live Dynamic Database)",
-        "version": "2.7.0 (Unified Hashtags, Compact Menu & Expanded Scene Pool)",
+        "version": "2.8.0 (No-Repeat Scene Engine & 25 Scene Pool)",
         "verified_scenes": len(VERIFIED_SCENES),
         "uptime": "24/7 online"
     }
