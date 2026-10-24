@@ -619,6 +619,28 @@ def format_cinema_post(cid, quote, translation, hashtags, show=None):
         f"<tg-spoiler>{tr_esc}</tg-spoiler>"
     )
 
+def extract_transition_words(quote, current_word=None):
+    if not quote:
+        return []
+    words = re.findall(r"[a-zA-Z']+", quote.lower())
+    stopwords = {
+        'a', 'an', 'the', 'to', 'of', 'in', 'on', 'at', 'for', 'and', 'or', 'so', 
+        'it', 'is', 'am', 'are', 'was', 'were', 'had', 'have', 'has', 'my', 'your', 
+        'his', 'her', 'we', 'he', 'she', 'they', 'i', 'me', 'you', 'him', 'them', 
+        'us', 'this', 'that', 'with', 'be', 'been', 'being', 'do', 'did', 'does',
+        'just', 'not', 'no', 'yes', 'but', 'if', 'by', 'up', 'out', 'all'
+    }
+    cur = (current_word or '').lower().strip("'")
+    
+    unique_words = []
+    for w in words:
+        clean_w = w.strip("'")
+        if len(clean_w) >= 3 and clean_w not in stopwords and clean_w != cur and clean_w != cur.replace("'", ""):
+            if clean_w not in unique_words:
+                unique_words.append(clean_w)
+                
+    return unique_words[:3]
+
 # Send video post with buttons (supports local file or direct URL)
 def send_cinema_card(chat_id, card_data, video_path_or_url, search_word=None):
     cid = card_data.get('id') or get_next_card_id()
@@ -630,17 +652,21 @@ def send_cinema_card(chat_id, card_data, video_path_or_url, search_word=None):
 
     caption = format_cinema_post(cid, quote, translation, hashtags, show)
 
-    keyboard = {
-        "inline_keyboard": [
-            [
-                {"text": f"🎬 Еще сцены со словом '{word}'", "callback_data": f"word:{word}:{cid}"}
-            ],
-            [
-                {"text": "🎲 Случайная сцена", "callback_data": "random"},
-                {"text": "📥 В Anki", "callback_data": f"anki:{cid}"}
-            ]
-        ]
-    }
+    transition_words = extract_transition_words(quote, word)
+    inline_kb = [
+        [{"text": f"🎬 Еще сцены со словом '{word}'", "callback_data": f"word:{word}:{cid}"}]
+    ]
+    if transition_words:
+        trans_row = []
+        for tw in transition_words:
+            trans_row.append({"text": f"👉 {tw}", "callback_data": f"word:{tw}:{cid}"})
+        inline_kb.append(trans_row)
+
+    inline_kb.append([
+        {"text": "🎲 Случайная сцена", "callback_data": "random"},
+        {"text": "📥 В Anki", "callback_data": f"anki:{cid}"}
+    ])
+    keyboard = {"inline_keyboard": inline_kb}
 
     try:
         if isinstance(video_path_or_url, str) and (video_path_or_url.startswith("http://") or video_path_or_url.startswith("https://")):
@@ -973,10 +999,39 @@ def read_root():
     return {
         "status": "online",
         "service": "Lingua Magic Cinema Bot 24/7 (Live Dynamic Database)",
-        "version": "2.8.0 (No-Repeat Scene Engine & 25 Scene Pool)",
+        "version": "2.9.0 (Interactive Transition Graph & Dynamic Yarn Diagnostic)",
         "verified_scenes": len(VERIFIED_SCENES),
         "uptime": "24/7 online"
     }
+
+@app.get("/diag_yarn/{word}")
+def diag_yarn(word: str):
+    import urllib.request, re
+    res = {"target_word": word}
+    try:
+        url = f"https://getyarn.io/yarn-find?text={urllib.parse.quote(word)}"
+        req = urllib.request.Request(url, headers=BROWSER_HEADERS)
+        with urllib.request.urlopen(req, timeout=10) as r:
+            html = r.read().decode("utf-8", errors="ignore")
+            clips = re.findall(r'/yarn-clip/([a-f0-9\-]+)', html)
+            res["search_status"] = r.status
+            res["clips_found"] = len(clips)
+            res["first_clip"] = clips[0] if clips else None
+    except Exception as e:
+        res["search_error"] = str(e)
+
+    if res.get("first_clip"):
+        cid = res["first_clip"]
+        try:
+            mp4_url = f"https://y.getyarn.io/{cid}.mp4"
+            req2 = urllib.request.Request(mp4_url, headers=BROWSER_HEADERS)
+            with urllib.request.urlopen(req2, timeout=10) as r2:
+                content = r2.read()
+                res["mp4_status"] = r2.status
+                res["mp4_size"] = len(content)
+        except Exception as e:
+            res["mp4_error"] = str(e)
+    return res
 
 # Configure compact menu button ("Практика") to fit cleanly on mobile screens
 def configure_bot_menu(chat_id=None):
